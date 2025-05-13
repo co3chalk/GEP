@@ -6,10 +6,5 @@
 
 APrototypeGameMode::APrototypeGameMode()
 {
-	// set default pawn class to our Blueprinted character
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/ThirdPersonCPP/Blueprints/ThirdPersonCharacter"));
-	if (PlayerPawnBPClass.Class != NULL)
-	{
-		DefaultPawnClass = PlayerPawnBPClass.Class;
-	}
+    // 블루프린트에서 설정하게 하므로, DefaultPawnClass는 설정하지 않음
 }
