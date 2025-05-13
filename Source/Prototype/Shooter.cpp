@@ -35,16 +35,22 @@ void UShooter::BeginPlay()
 
 	if (OwnerChar)
 	{
-		//·çÆ®(SceneComponent)¿¡ ºÎÂø
 		GrabVisualMesh->AttachToComponent(
 			OwnerChar->GetRootComponent(),
 			FAttachmentTransformRules::KeepRelativeTransform);
-
 		RotationConstraint->AttachToComponent(
 			OwnerChar->GetRootComponent(),
 			FAttachmentTransformRules::KeepRelativeTransform);
+
+		GrabVisualMesh->RegisterComponent();
+		PhysicsHandle->RegisterComponent();
+		RotationConstraint->RegisterComponent();
 	}
+
+	/* ÄÄÆ÷³ÍÆ® Tick À» Actor Tick µÚ·Î ¹Ì·ë */
+	PrimaryComponentTick.TickGroup = TG_PostUpdateWork;
 }
+
 
 /*-------------------------- Tick ---------------------------*/
 void UShooter::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -65,7 +71,7 @@ void UShooter::Grab() {
 	if (bIsLineTraceHit)
 	{
 		UPrimitiveComponent* HitComponent = CachedHitResult.GetComponent();
-		if (!HitComponent) return;
+		if (!HitComponent)  return;
 
 		if (HitComponent->IsSimulatingPhysics())
 		{
@@ -106,6 +112,19 @@ void UShooter::Grab() {
 			bIsGrabbingNonPhysics = true;
 		}
 	}
+	if (!bIsLineTraceHit || !CachedHitResult.GetComponent())
+	{
+		MissedGrabTarget = LineEnd;
+		MissedGrabTimer = MissedGrabDuration;
+		bShowMissedGrabVisual = true;
+
+		if (GrabVisualMesh)
+		{
+			GrabVisualMesh->SetVisibility(true);
+		}
+		return;
+	}
+
 }
 void UShooter::Release() {
 	if (GrabbedComponent)
@@ -348,6 +367,7 @@ void UShooter::UpdateMissedGrabVisual(float DeltaTime)
 		GrabVisualMesh->SetWorldLocation(Mid);
 		GrabVisualMesh->SetWorldRotation(FRotationMatrix::MakeFromZ(RopeDir).Rotator());
 		GrabVisualMesh->SetWorldScale3D(FVector(Thickness, Thickness, ScaleZ));
+		GrabVisualMesh->SetVisibility(true);
 	}
 }
 void UShooter::UpdateGrabVisualMesh()
