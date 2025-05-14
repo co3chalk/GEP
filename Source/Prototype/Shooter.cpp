@@ -1,5 +1,6 @@
 #include "Shooter.h"
 #include "PrototypeCharacter.h"
+#include "EnemyActor.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SceneComponent.h" 
 #include "Components/StaticMeshComponent.h"
@@ -221,6 +222,10 @@ void UShooter::UpdateLineTrace()
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerChar);
+	if (CachedHitResult.GetActor() && CachedHitResult.GetActor()->ActorHasTag("Enemy"))
+	{
+		Params.AddIgnoredActor(CachedHitResult.GetActor());
+	}
 
 	bIsLineTraceHit = GetWorld()->LineTraceSingleByChannel(
 		CachedHitResult, LineStart, LineEnd, ECC_PhysicsBody, Params);

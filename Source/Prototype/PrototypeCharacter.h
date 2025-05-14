@@ -7,6 +7,8 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UShooter;
+class UElectricWeapon;
+class UInputManager;
 
 UCLASS()
 class PROTOTYPE_API APrototypeCharacter : public ACharacter
@@ -34,6 +36,9 @@ public:
 	/* Shooter 상태가 회전을 막는지 확인용 */
 	bool IsRotationLocked() const;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UInputManager* InputManager;
+
 private:
 	/* --- 카메라 컴포넌트 --- */
 	UPROPERTY(VisibleAnywhere)
@@ -45,4 +50,7 @@ private:
 	/* --- Grab/Swing 담당 컴포넌트 --- */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UShooter* Shooter;
+	/* --- 전기공격 담당 컴포넌트 --- */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UElectricWeapon* ElectricWeapon;
 };

@@ -1,5 +1,7 @@
 #include "PrototypeCharacter.h"
 #include "Shooter.h"
+#include "ElectricWeapon.h"
+#include "InputManager.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -42,8 +44,12 @@ APrototypeCharacter::APrototypeCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	/* Shooter 컴포넌트 생성 */
+	/* 발사체 관련 컴포넌트 생성 */
 	Shooter = CreateDefaultSubobject<UShooter>(TEXT("Shooter"));
+	ElectricWeapon = CreateDefaultSubobject<UElectricWeapon>(TEXT("ElectricWeapon"));
+
+	/*인풋 매니저 생성*/
+	InputManager = CreateDefaultSubobject<UInputManager>(TEXT("InputManager"));
 }
 
 /* ---------- BeginPlay ---------- */
@@ -85,15 +91,17 @@ void APrototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInput->BindAxis("MoveForward", this, &APrototypeCharacter::MoveForward);
 	PlayerInput->BindAxis("MoveRight", this, &APrototypeCharacter::MoveRight);
 
-	/* Grab / Scroll / 우클릭 → Shooter 로 위임 */
-	PlayerInput->BindAction("LeftMouseButton", IE_Pressed, Shooter, &UShooter::Grab);
-	PlayerInput->BindAction("LeftMouseButton", IE_Released, Shooter, &UShooter::Release);
+	/* Grab / Scroll / 우클릭 → 인풋매니저 로 위임 */
+	PlayerInput->BindAction("LeftMouseButton", IE_Pressed, InputManager, &UInputManager::HandleGrab);
+	PlayerInput->BindAction("LeftMouseButton", IE_Released, InputManager, &UInputManager::HandleRelease);
 
-	PlayerInput->BindAction("ScrollUp", IE_Pressed, Shooter, &UShooter::ScrollUp);
-	PlayerInput->BindAction("ScrollDown", IE_Pressed, Shooter, &UShooter::ScrollDown);
+	PlayerInput->BindAction("ScrollUp", IE_Pressed, InputManager, &UInputManager::HandleScrollUp);
+	PlayerInput->BindAction("ScrollDown", IE_Pressed, InputManager, &UInputManager::HandleScrollDown);
 
-	PlayerInput->BindAction("RightMouseButton", IE_Pressed, Shooter, &UShooter::RightMouseDown);
-	PlayerInput->BindAction("RightMouseButton", IE_Released, Shooter, &UShooter::RightMouseUp);
+	PlayerInput->BindAction("RightMouseButton", IE_Pressed, InputManager, &UInputManager::HandleRightMouseDown);
+	PlayerInput->BindAction("RightMouseButton", IE_Released, InputManager, &UInputManager::HandleRightMouseUp);
+
+	PlayerInput->BindAction("SwapWeapon", IE_Pressed, InputManager, &UInputManager::HandleSwapWeapon);
 }
 
 /* ---------- 이동 ---------- */
