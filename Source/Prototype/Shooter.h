@@ -64,7 +64,7 @@ private:
 	// 비물리
 	FVector NonPhysicsHitLocation;
 	float   NonPhysicsGrabDistance = 0.f;
-	float   NonPhysicsDistanceReduceSpeed = 1500.f;
+	float   NonPhysicsDistanceReduceSpeed = 500.f;
 
 	// 로프 반경?충돌
 	bool bNonPhysicsCollisionOccurred = false;
