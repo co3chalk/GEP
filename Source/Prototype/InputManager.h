@@ -8,6 +8,7 @@ class UShooter;
 //class UFireComponent;
 //class UWaterComponent;
 class UElectricWeapon;
+class APrototypeCharacter;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROTOTYPE_API UInputManager : public UActorComponent
@@ -41,4 +42,7 @@ private:
     bool bUseElectric = false;
 
     bool bLevelCleared = false;
+
+    APrototypeCharacter* OwnerChar = nullptr;
+
 };

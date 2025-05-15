@@ -183,35 +183,6 @@ void UShooter::RightMouseDown() { bIsRightMouseButtonDown = true; }
 void UShooter::RightMouseUp() { bIsRightMouseButtonDown = false; }
 
 /*------------------- 내부 헬퍼 (본문 동일) --------------------*/
-void UShooter::RotateCharacterToMouse()
-{
-	if (!OwnerChar || !FollowCamera) return;
-
-	APlayerController* PC = Cast<APlayerController>(OwnerChar->GetController());
-	if (!PC) return;
-
-	FVector WorldLocation, WorldDirection;
-	if (PC->DeprojectMousePositionToWorld(WorldLocation, WorldDirection))
-	{
-		FPlane GroundPlane = FPlane(OwnerChar->GetActorLocation(), FVector::UpVector);
-		FVector LookAtTarget = FMath::LinePlaneIntersection(
-			WorldLocation, WorldLocation + WorldDirection * 10000.0f, GroundPlane);
-
-		FVector Direction = LookAtTarget - OwnerChar->GetActorLocation();
-		Direction.Z = 0.0f;
-
-		if (!Direction.IsNearlyZero())
-		{
-			FRotator TargetRotation = Direction.Rotation();
-			FRotator CurrentRotation = OwnerChar->GetActorRotation();
-
-			float InterpSpeed = 10.0f;
-			FRotator NewRotation = FMath::RInterpTo(
-				CurrentRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), InterpSpeed);
-			OwnerChar->SetActorRotation(NewRotation);
-		}
-	}
-}
 void UShooter::UpdateLineTrace()
 {
 	if (!OwnerChar) return;

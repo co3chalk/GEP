@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include <functional>
 #include "PrototypeCharacter.generated.h"
 
 class USpringArmComponent;
@@ -33,11 +34,20 @@ public:
 	/* 마우스 바라보기 */
 	void RotateCharacterToMouse();
 
+	// 마우스 회전을 허용할지 여부 (좌/우 클릭 중에만 true)
+	bool bShouldRotateToMouse = false;
+
+
 	/* Shooter 상태가 회전을 막는지 확인용 */
 	bool IsRotationLocked() const;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UInputManager* InputManager;
+
+	bool bWaitingForPostRotationAction = false;
+	FRotator RotationTarget;
+	TFunction<void()> PostRotationAction;
+
 
 private:
 	/* --- 카메라 컴포넌트 --- */

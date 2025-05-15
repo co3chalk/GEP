@@ -73,12 +73,25 @@ void APrototypeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	/* Shooter가 물체를 잡고 있지 않을 때만 회전 */
-	if (!IsRotationLocked())
+	if (IsRotationLocked())
 	{
+		// 물체를 잡고 있을 땐 회전하지 않음
+		return;
+	}
+
+	// 마우스 커서를 바라봐야 하는 상황이면 직접 회전
+	if (bShouldRotateToMouse)
+	{
+		GetCharacterMovement()->bOrientRotationToMovement = false;
 		RotateCharacterToMouse();
 	}
+	else
+	{
+		// 평소엔 이동 방향을 바라보도록 설정
+		GetCharacterMovement()->bOrientRotationToMovement = true;
+	}
 }
+
 
 /* ---------- 입력 바인딩 ---------- */
 void APrototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput)
@@ -137,25 +150,32 @@ void APrototypeCharacter::RotateCharacterToMouse()
 	FVector WorldLoc, WorldDir;
 	if (PC->DeprojectMousePositionToWorld(WorldLoc, WorldDir))
 	{
-		FPlane   GroundPlane(GetActorLocation(), FVector::UpVector);
-		FVector  Target = FMath::LinePlaneIntersection(WorldLoc,
-			WorldLoc + WorldDir * 10000.f,
-			GroundPlane);
-		FVector  Dir = Target - GetActorLocation();
+		FPlane GroundPlane(GetActorLocation(), FVector::UpVector);
+		FVector Target = FMath::LinePlaneIntersection(WorldLoc, WorldLoc + WorldDir * 10000.f, GroundPlane);
+		FVector Dir = Target - GetActorLocation();
 		Dir.Z = 0.f;
 
 		if (!Dir.IsNearlyZero())
 		{
-			const FRotator TargetRot = Dir.Rotation();
-			const float    Speed = 10.f;
-			FRotator NewRot = FMath::RInterpTo(GetActorRotation(),
-				TargetRot,
-				GetWorld()->GetDeltaSeconds(),
-				Speed);
+			RotationTarget = Dir.Rotation();  // 목표 방향 저장
+			const float Speed = 25.f;
+			FRotator NewRot = FMath::RInterpTo(GetActorRotation(), RotationTarget, GetWorld()->GetDeltaSeconds(), Speed);
 			SetActorRotation(NewRot);
+
+			//  회전이 거의 끝났으면 예약된 함수 실행
+			if (bWaitingForPostRotationAction && GetActorRotation().Equals(RotationTarget, 1.0f))
+			{
+				bWaitingForPostRotationAction = false;
+				if (PostRotationAction)
+				{
+					PostRotationAction();           // 함수 실행
+					PostRotationAction = nullptr;  // 초기화
+				}
+			}
 		}
 	}
 }
+
 
 bool APrototypeCharacter::IsRotationLocked() const
 {
