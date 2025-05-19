@@ -37,10 +37,11 @@ void UInputManager::HandleGrab()
 {
 	if (!OwnerChar) return;
 
-	// 회전 완료 후 Grab 실행 예약
+	// 한 번 클릭 → 회전 예약
 	OwnerChar->bShouldRotateToMouse = true;
 	OwnerChar->bWaitingForPostRotationAction = true;
 
+	// 회전 완료 후 실행할 동작 예약
 	OwnerChar->PostRotationAction = [this]()
 		{
 			if (bUseElectric)

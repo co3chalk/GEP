@@ -74,23 +74,34 @@ void APrototypeCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	if (IsRotationLocked())
-	{
-		// 물체를 잡고 있을 땐 회전하지 않음
 		return;
-	}
 
-	// 마우스 커서를 바라봐야 하는 상황이면 직접 회전
 	if (bShouldRotateToMouse)
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		RotateCharacterToMouse();
+
+		// 회전 완료 확인
+		if (GetActorRotation().Equals(RotationTarget, 1.0f))
+		{
+			bShouldRotateToMouse = false;
+
+			// 예약된 동작이 있으면 실행
+			if (bWaitingForPostRotationAction && PostRotationAction)
+			{
+				bWaitingForPostRotationAction = false;
+				PostRotationAction();
+				PostRotationAction = nullptr;
+			}
+		}
 	}
 	else
 	{
-		// 평소엔 이동 방향을 바라보도록 설정
+		// 기본은 이동 방향 회전
 		GetCharacterMovement()->bOrientRotationToMovement = true;
 	}
 }
+
 
 
 /* ---------- 입력 바인딩 ---------- */
@@ -157,24 +168,17 @@ void APrototypeCharacter::RotateCharacterToMouse()
 
 		if (!Dir.IsNearlyZero())
 		{
-			RotationTarget = Dir.Rotation();  // 목표 방향 저장
-			const float Speed = 25.f;
+			// 목표 회전 저장
+			RotationTarget = Dir.Rotation();
+
+			// 부드럽게 보간 회전
+			const float Speed = 100.f;
 			FRotator NewRot = FMath::RInterpTo(GetActorRotation(), RotationTarget, GetWorld()->GetDeltaSeconds(), Speed);
 			SetActorRotation(NewRot);
-
-			//  회전이 거의 끝났으면 예약된 함수 실행
-			if (bWaitingForPostRotationAction && GetActorRotation().Equals(RotationTarget, 1.0f))
-			{
-				bWaitingForPostRotationAction = false;
-				if (PostRotationAction)
-				{
-					PostRotationAction();           // 함수 실행
-					PostRotationAction = nullptr;  // 초기화
-				}
-			}
 		}
 	}
 }
+
 
 
 bool APrototypeCharacter::IsRotationLocked() const

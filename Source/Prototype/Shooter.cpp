@@ -103,6 +103,7 @@ void UShooter::Grab() {
 		}
 		else
 		{
+
 			FVector CurrentVelocity = OwnerChar->GetCharacterMovement()->Velocity;
 			CurrentVelocity.X = 0.0f;  // Z축 힘만 초기화
 			CurrentVelocity.Y = 0.0f;  // Z축 힘만 초기화
