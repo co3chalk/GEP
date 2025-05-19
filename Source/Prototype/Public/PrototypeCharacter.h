@@ -55,7 +55,11 @@ private:
 	USpringArmComponent* CameraBoom;
 
 	UPROPERTY(VisibleAnywhere)
+	USceneComponent* CameraPivot;
+
+	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* FollowCamera;
+
 
 	/* --- Grab/Swing 담당 컴포넌트 --- */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))

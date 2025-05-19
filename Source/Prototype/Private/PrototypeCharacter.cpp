@@ -28,21 +28,15 @@ APrototypeCharacter::APrototypeCharacter()
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.3f;
 
-	/* 카메라 붐 */
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 1000.f;
-	CameraBoom->bUsePawnControlRotation = true;
-	CameraBoom->bDoCollisionTest = false;
-	CameraBoom->bInheritPitch = false;
-	CameraBoom->bInheritRoll = false;
-	CameraBoom->bInheritYaw = true;
-	CameraBoom->SetRelativeRotation(FRotator(-45.f, 0.f, 0.f));
+	// 카메라
+	CameraPivot = CreateDefaultSubobject<USceneComponent>(TEXT("CameraPivot"));
+	CameraPivot->SetupAttachment(nullptr); // 캐릭터에 부착하지 않음
 
-	/* 팔로우 카메라 */
+
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
-	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+	FollowCamera->SetupAttachment(CameraPivot);
 	FollowCamera->bUsePawnControlRotation = false;
+
 
 	/* 발사체 관련 컴포넌트 생성 */
 	Shooter = CreateDefaultSubobject<UShooter>(TEXT("Shooter"));
@@ -56,6 +50,7 @@ APrototypeCharacter::APrototypeCharacter()
 void APrototypeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
 
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
@@ -72,7 +67,13 @@ void APrototypeCharacter::BeginPlay()
 void APrototypeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	FVector CameraOffset = FVector(-1000.f, 0.f, 0000.f); // 캐릭터 뒤 + 위쪽
+	FRotator CameraRotation = FRotator(-45.f, 0.f, 0.f); // 위에서 내려다보는 각도
 
+	FVector NewLocation = GetActorLocation() + CameraRotation.RotateVector(CameraOffset);
+
+	CameraPivot->SetWorldLocation(NewLocation);
+	CameraPivot->SetWorldRotation(CameraRotation);
 	if (IsRotationLocked())
 		return;
 

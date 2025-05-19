@@ -3,7 +3,7 @@
 
 #include "WaterFlow.h"
 #include "Components/BoxComponent.h"
-#include "Prototype/PrototypeCharacter.h" // 플레이어 클래스
+#include "PrototypeCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 // Sets default values
 AWaterFlow::AWaterFlow()
