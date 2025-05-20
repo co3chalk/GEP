@@ -40,8 +40,9 @@ private:
     FTimerHandle FreezeTimerHandle;
 
     // 감전 이펙트
-    UPROPERTY(EditDefaultsOnly, Category = "Effect")
-    UNiagaraSystem* ElectroShockFX = nullptr;
+    UPROPERTY(VisibleAnywhere, Category = "Effect")
+    UNiagaraComponent* ElectroShockEffect;
+
 
     void Unfreeze();
     void ApplyElectroShockEffect();

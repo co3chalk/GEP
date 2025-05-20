@@ -1,40 +1,64 @@
 #include "EnemyActor.h"
-#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 #include "Components/StaticMeshComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
 AEnemyActor::AEnemyActor()
 {
-    Tags.Add("Enemy"); //  태그
-
+    Tags.Add("Enemy");
     PrimaryActorTick.bCanEverTick = true;
 
     Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
     RootComponent = Mesh;
 
     Mesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-    Mesh->SetCollisionObjectType(ECC_GameTraceChannel2);  // Enemy
+    Mesh->SetCollisionObjectType(ECC_GameTraceChannel2); // Enemy
     Mesh->SetCollisionResponseToAllChannels(ECR_Ignore);
-    Mesh->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Overlap);  // Bullet에만 반응
+    Mesh->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Overlap); // Bullet
 
     static ConstructorHelpers::FObjectFinder<UStaticMesh> SM(TEXT("/Engine/BasicShapes/Cube"));
     if (SM.Succeeded())
         Mesh->SetStaticMesh(SM.Object);
+
+    // 나이아가라 컴포넌트 생성 및 설정
+    ElectroShockEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ElectroShockEffect"));
+    ElectroShockEffect->SetupAttachment(Mesh);
+    ElectroShockEffect->SetAutoActivate(false); // 감전 시 수동 실행
+    ElectroShockEffect->SetRelativeLocation(FVector(0.f, 0.f, 50.f)); // 머리 위
+    ElectroShockEffect->SetRelativeScale3D(FVector(1.5f)); // 크기 키움
+
+    static ConstructorHelpers::FObjectFinder<UNiagaraSystem> FX(TEXT("/Game/FX/NS_Elec_Shock"));
+    if (FX.Succeeded())
+        ElectroShockEffect->SetAsset(FX.Object);
 }
 
 void AEnemyActor::BeginPlay()
 {
     Super::BeginPlay();
-
-    // 스폰된 위치 기준으로 Patrol 좌표 계산
     const FVector Base = GetActorLocation();
     PatrolPointA = Base + PatrolOffsetA;
     PatrolPointB = Base + PatrolOffsetB;
 }
 
+void AEnemyActor::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    if (bIsFrozen) return;
+
+    const float Speed = 150.f;
+    const FVector Target = bGoingToB ? PatrolPointB : PatrolPointA;
+    FVector Dir = (Target - GetActorLocation()).GetSafeNormal();
+    SetActorLocation(GetActorLocation() + Dir * Speed * DeltaTime);
+
+    if (FVector::DistSquared(GetActorLocation(), Target) < 25.f * 25.f)
+        bGoingToB = !bGoingToB;
+}
+
 void AEnemyActor::Freeze(float Seconds)
 {
-    if (bIsFrozen) return;  // 중복 방지
+    if (bIsFrozen) return;
 
     bIsFrozen = true;
     ApplyElectroShockEffect();
@@ -48,39 +72,27 @@ void AEnemyActor::Freeze(float Seconds)
     );
 }
 
-void AEnemyActor::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-
-    if (bIsFrozen)
-        return; // 이동만 막고, 다른 Tick 로직은 여기에 넣으면 됨
-
-    const float Speed = 150.f;
-    const FVector Target = bGoingToB ? PatrolPointB : PatrolPointA;
-    FVector Dir = (Target - GetActorLocation()).GetSafeNormal();
-    SetActorLocation(GetActorLocation() + Dir * Speed * DeltaTime);
-
-    if (FVector::DistSquared(GetActorLocation(), Target) < 25.f * 25.f)
-        bGoingToB = !bGoingToB;
-}
-
-
 void AEnemyActor::ApplyElectroShockEffect()
 {
-    if (!ElectroShockFX) return;
-
-    UNiagaraFunctionLibrary::SpawnSystemAttached(
-        ElectroShockFX,
-        Mesh,  // 루트 Mesh에 붙이기
-        NAME_None,
-        FVector::ZeroVector,
-        FRotator::ZeroRotator,
-        EAttachLocation::SnapToTarget,
-        true  // AutoDestroy
-    );
+    if (ElectroShockEffect)
+    {
+        // 강제로 초기화
+        ElectroShockEffect->Deactivate();
+        ElectroShockEffect->SetActive(false); // 완전 비활성화
+        ElectroShockEffect->SetActive(true);  // 다시 켜기
+        ElectroShockEffect->Activate(true);   // 재생성
+    }
 }
+
 
 void AEnemyActor::Unfreeze()
 {
     bIsFrozen = false;
+
+    if (ElectroShockEffect)
+    {
+        ElectroShockEffect->Deactivate();
+        ElectroShockEffect->SetActive(false); // 종료
+    }
 }
+

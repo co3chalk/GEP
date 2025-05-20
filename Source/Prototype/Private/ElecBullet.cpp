@@ -25,22 +25,23 @@ AElecBullet::AElecBullet()
     Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
     Movement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement"));
-    Movement->InitialSpeed = 3000.f;
+    Movement->InitialSpeed = 2000.f;
     Movement->MaxSpeed = 3000.f;
     Movement->bRotationFollowsVelocity = true;
+    Movement->ProjectileGravityScale = 0.0f;
 
     ElecEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ElectricEffect"));
     ElecEffect->SetupAttachment(RootComponent);
     ElecEffect->SetAutoActivate(true); // 자동 실행
 
-    InitialLifeSpan = 3.f;
+    InitialLifeSpan = 8.f;
 }
 
 void AElecBullet::OnHit(
     UPrimitiveComponent*, AActor* Other, UPrimitiveComponent*, FVector, const FHitResult& Hit)
 {
     if (AEnemyActor* Enemy = Cast<AEnemyActor>(Other))
-        Enemy->Freeze(1.5f);
+        Enemy->Freeze(2.5f);
 
     if (ImpactFX)
         UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactFX, Hit.ImpactPoint, FRotator::ZeroRotator);

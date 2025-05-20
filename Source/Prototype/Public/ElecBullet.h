@@ -34,7 +34,6 @@ protected:
 private:
     UPROPERTY(VisibleDefaultsOnly) USphereComponent* Collision;
     UPROPERTY(VisibleAnywhere)     UStaticMeshComponent * Mesh;
-
     UPROPERTY(EditDefaultsOnly)    UParticleSystem* ImpactFX = nullptr;
     UPROPERTY(VisibleAnywhere) UProjectileMovementComponent * Movement;
 };
