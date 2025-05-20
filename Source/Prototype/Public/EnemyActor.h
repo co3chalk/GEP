@@ -1,6 +1,8 @@
 #pragma once
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "NiagaraSystem.h"
 #include "EnemyActor.generated.h"
 
 class UStaticMeshComponent;
@@ -22,7 +24,6 @@ private:
     UPROPERTY(VisibleAnywhere)
     UStaticMeshComponent* Mesh;
 
-    // ?? 상대 좌표로 블루프린트에서 설정 가능
     UPROPERTY(EditAnywhere, Category = "Patrol")
     FVector PatrolOffsetA = FVector(-400, 0, 0);
 
@@ -33,5 +34,15 @@ private:
     FVector PatrolPointB;
 
     bool bGoingToB = true;
-    float FrozenTimer = 0.f;
+    bool bIsFrozen = false;
+
+    // 누락되어 있던 타이머 핸들 선언
+    FTimerHandle FreezeTimerHandle;
+
+    // 감전 이펙트
+    UPROPERTY(EditDefaultsOnly, Category = "Effect")
+    UNiagaraSystem* ElectroShockFX = nullptr;
+
+    void Unfreeze();
+    void ApplyElectroShockEffect();
 };
