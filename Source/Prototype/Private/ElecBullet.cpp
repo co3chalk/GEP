@@ -29,6 +29,10 @@ AElecBullet::AElecBullet()
     Movement->MaxSpeed = 3000.f;
     Movement->bRotationFollowsVelocity = true;
 
+    ElecEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ElectricEffect"));
+    ElecEffect->SetupAttachment(RootComponent);
+    ElecEffect->SetAutoActivate(true); // 자동 실행
+
     InitialLifeSpan = 3.f;
 }
 

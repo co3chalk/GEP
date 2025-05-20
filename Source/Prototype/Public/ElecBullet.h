@@ -1,4 +1,7 @@
 #pragma once
+
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ElecBullet.generated.h"
@@ -13,6 +16,15 @@ class PROTOTYPE_API AElecBullet : public AActor
 
 public:
     AElecBullet();
+
+    // 전기 이펙트 (총알 이동 중)
+    UPROPERTY(VisibleAnywhere)
+    UNiagaraComponent* ElecEffect;
+
+    // 충돌 시 폭발 이펙트
+    UPROPERTY(EditDefaultsOnly)
+    UNiagaraSystem* ImpactEffect;
+
 
 protected:
     UFUNCTION() void OnHit(
