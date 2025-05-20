@@ -186,3 +186,8 @@ bool APrototypeCharacter::IsRotationLocked() const
 {
 	return Shooter && Shooter->ShouldLockRotation();
 }
+
+void APrototypeCharacter::SetGetEnergy(bool bValue)
+{
+	bGetEnergy = bValue;
+}

@@ -48,7 +48,11 @@ public:
 	FRotator RotationTarget;
 	TFunction<void()> PostRotationAction;
 
+	/* 에너지 관련 bool 변수 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy")
+	bool bGetEnergy = false;
 
+	void SetGetEnergy(bool bValue);  
 private:
 	/* --- 카메라 컴포넌트 --- */
 	UPROPERTY(VisibleAnywhere)

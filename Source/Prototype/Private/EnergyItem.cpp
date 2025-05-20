@@ -44,8 +44,10 @@ void AEnergyItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
 {
     if (APrototypeCharacter* Player = Cast<APrototypeCharacter>(OtherActor))
     {
-        
+        Player->SetGetEnergy(true); // 에너지 획득 처리
 
+        //각 원소마다 획득 카운트 추가, 에너지 획득 되고 각 원소에 맞게 1개 이상 존재하면 발사 가능하게 변경
+        
         // 아이템 제거
         Destroy();
     }
