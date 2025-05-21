@@ -28,6 +28,7 @@ AEnemyActor::AEnemyActor()
     ElectroShockEffect->SetRelativeLocation(FVector(0.f, 0.f, 50.f)); // 머리 위
     ElectroShockEffect->SetRelativeScale3D(FVector(1.5f)); // 크기 키움
 
+    static ConstructorHelpers::FObjectFinder<UNiagaraSystem> FX(TEXT("/Game/Effects/Basic_VFX/Niagara/NS_Basic_9"));
     if (FX.Succeeded())
         ElectroShockEffect->SetAsset(FX.Object);
 }
