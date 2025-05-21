@@ -191,3 +191,15 @@ void APrototypeCharacter::SetGetEnergy(bool bValue)
 {
 	bGetEnergy = bValue;
 }
+void APrototypeCharacter::SetGetFireEnergy(bool bValue)
+{
+	bGetFireEnergy = bValue;
+}
+void APrototypeCharacter::SetGetWaterEnergy(bool bValue)
+{
+	bGetWaterEnergy = bValue;
+}
+void APrototypeCharacter::SetGetElectricEnergy(bool bValue)
+{
+	bGetElectricEnergy = bValue;
+}

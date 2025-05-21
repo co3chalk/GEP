@@ -49,11 +49,20 @@ public:
 	TFunction<void()> PostRotationAction;
 
 	/* 에너지 관련 bool 변수 */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy")	//이거 없어도 될거임 ㅇㅇ
 	bool bGetEnergy = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Fire_Energy")
+	bool bGetFireEnergy = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Water_Energy")
+	bool bGetWaterEnergy = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Elctric_Energy")
+	bool bGetElectricEnergy = false;
+
 
 	void SetGetEnergy(bool bValue);  
-
+	void SetGetFireEnergy(bool bValue);
+	void SetGetWaterEnergy(bool bValue);
+	void SetGetElectricEnergy(bool bValue);
 
 private:
 	/* --- 카메라 컴포넌트 --- */
