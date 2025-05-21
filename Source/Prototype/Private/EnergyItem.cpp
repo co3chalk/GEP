@@ -47,7 +47,21 @@ void AEnergyItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
         Player->SetGetEnergy(true); // 에너지 획득 처리
 
         //각 원소마다 획득 카운트 추가, 에너지 획득 되고 각 원소에 맞게 1개 이상 존재하면 발사 가능하게 변경
-        
+        /*switch (id) {
+        case 0:
+            Player->SetGetFireEnergy(true);
+            //얻은 불에너지 갯수 증가
+            break;
+        case 1:
+            Player->SetGetWaterEnergy(true);
+            //
+            break;
+        case 2:
+            Player->SetGetElectricEnergy(true);
+            //
+            break;
+        }
+        */
         // 아이템 제거
         Destroy();
     }
