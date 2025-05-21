@@ -191,7 +191,3 @@ void APrototypeCharacter::SetGetEnergy(bool bValue)
 {
 	bGetEnergy = bValue;
 }
-void APrototypeCharacter::SetGetElectricEnergy(bool bValue)
-{
-	bGetElectricEnergy = bValue;
-}

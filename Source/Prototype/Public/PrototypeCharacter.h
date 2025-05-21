@@ -54,10 +54,7 @@ public:
 
 	void SetGetEnergy(bool bValue);  
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Electric_Energy")
-	bool bGetElectricEnergy = false;
 
-	void SetGetElectricEnergy(bool bValue);
 private:
 	/* --- 카메라 컴포넌트 --- */
 	UPROPERTY(VisibleAnywhere)
