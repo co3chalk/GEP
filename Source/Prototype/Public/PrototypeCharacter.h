@@ -19,8 +19,11 @@ class PROTOTYPE_API APrototypeCharacter : public ACharacter
 public:
 	APrototypeCharacter();
 
+	void StartFire();
+
 protected:
 	virtual void BeginPlay() override;
+	
 
 public:
 	virtual void Tick(float DeltaTime) override;
