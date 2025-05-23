@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Components/SphereComponent.h"
 #include "EnemyActor.h"
+#include "Battery.h"
 
 AElecBullet::AElecBullet()
 {
@@ -34,17 +35,20 @@ AElecBullet::AElecBullet()
     ElecEffect->SetupAttachment(RootComponent);
     ElecEffect->SetAutoActivate(true); // 자동 실행
 
+
     InitialLifeSpan = 8.f;
 }
 
-void AElecBullet::OnHit(
-    UPrimitiveComponent*, AActor* Other, UPrimitiveComponent*, FVector, const FHitResult& Hit)
+void AElecBullet::OnHit(UPrimitiveComponent*, AActor* Other, UPrimitiveComponent*, FVector, const FHitResult& Hit)
 {
     if (AEnemyActor* Enemy = Cast<AEnemyActor>(Other))
         Enemy->Freeze(2.5f);
 
+    else if (ABattery* Battery = Cast<ABattery>(Other))
+        Battery->Charge();
+
     if (ImpactFX)
-        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactFX, Hit.ImpactPoint, FRotator::ZeroRotator);
+        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactFX, Hit.ImpactPoint);
 
     Destroy();
 }
