@@ -1,3 +1,4 @@
+// Battery.h
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -10,11 +11,7 @@ class PROTOTYPE_API ABattery : public AActor
 
 public:
     ABattery();
-
-    /* ElecBullet이 부딪힐 때 호출 */
     void Charge();
-
-    /* 외부 장치가 전원 여부를 물어볼 때 */
     UFUNCTION(BlueprintPure) bool IsPowered() const { return ChargeCount > 0; }
 
 protected:
@@ -23,13 +20,14 @@ protected:
 
 private:
     /* ---------- 파워 로직 ---------- */
-    int32  ChargeCount = 0;          // 0~3
-    float  RemainingPowerTime = 0.f;        // 실시간 감소
-    const  float ChargeUnit = 3.f;        // 한 번에 3초
+    int32  ChargeCount = 0;
+    float  RemainingPowerTime = 0.f;
+    const  float ChargeUnit = 3.f;
 
-    /* ---------- 시각화 ---------- */
-    UPROPERTY(VisibleAnywhere) UStaticMeshComponent* BodyMesh;
-    UPROPERTY(VisibleAnywhere) TArray<UStaticMeshComponent*> Indicators; // 0~2
+    /* ---------- 시각화 및 충돌 ---------- */
+    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UStaticMeshComponent* BodyMesh; // <-- 이 컴포넌트가 시각화와 충돌을 모두 담당합니다.
+    UPROPERTY(VisibleAnywhere) TArray<UStaticMeshComponent*> Indicators;
 
     void UpdateIndicators();
 };
