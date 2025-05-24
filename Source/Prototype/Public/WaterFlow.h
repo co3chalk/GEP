@@ -26,6 +26,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* BoxComp;
 
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* MeshComp;
+
 	TSet<APrototypeCharacter*> OverlappingCharacters;
 
 	UFUNCTION()

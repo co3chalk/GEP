@@ -3,6 +3,7 @@
 
 #include "WaterFlow.h"
 #include "Components/BoxComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "PrototypeCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 // Sets default values
@@ -19,6 +20,10 @@ AWaterFlow::AWaterFlow()
     BoxComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
     BoxComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
     BoxComp->SetBoxExtent(FVector(200.f, 200.f, 100.f));
+
+    MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
+    MeshComp->SetupAttachment(BoxComp);
+    MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
