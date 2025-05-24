@@ -64,10 +64,8 @@ void AElecBullet::OnHit(UPrimitiveComponent*, AActor* Other, UPrimitiveComponent
             UE_LOG(LogTemp, Log, TEXT("AElecBullet::OnHit - Successfully activated NiagaraComponent."));
         }
     }
-    // else if (ImpactFX) 블록은 UNiagaraSystem* ImpactEffect가 존재한다면 실행되지 않습니다.
-    // 기존 UParticleSystem* ImpactFX와 UNiagaraSystem* ImpactEffect 중 무엇을 우선할지 고려해야 합니다.
-    // 현재 코드에서는 ImpactEffect(Niagara)가 우선됩니다.
-    else if (ImpactFX) // 기존 파티클 시스템도 있다면
+  
+    else if (ImpactFX)
     {
         UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactFX, GetActorLocation(), FRotator::ZeroRotator, FVector(1.f), true);
         UE_LOG(LogTemp, Log, TEXT("AElecBullet::OnHit - Spawned ParticleSystem for ImpactFX."));
@@ -79,7 +77,7 @@ void AElecBullet::OnHit(UPrimitiveComponent*, AActor* Other, UPrimitiveComponent
 
     if (AEnemyActor* Enemy = Cast<AEnemyActor>(Other))
     {
-        Enemy->Freeze(0.5f);
+        Enemy->Freeze(3.0f);
         UE_LOG(LogTemp, Log, TEXT("AElecBullet::OnHit - Hit Enemy: %s"), *Other->GetName());
     }
     else if (ABattery* Battery = Cast<ABattery>(Other))

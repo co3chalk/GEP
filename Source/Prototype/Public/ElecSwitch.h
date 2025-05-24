@@ -1,9 +1,11 @@
+// ElecSwitch.h (수정본)
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ElecSwitch.generated.h"
 
 class UBoxComponent;
+class UStaticMeshComponent; // <-- 스태틱 메시 컴포넌트 전방 선언
 
 UCLASS()
 class PROTOTYPE_API AElecSwitch : public AActor
@@ -18,6 +20,10 @@ protected:
     virtual void BeginPlay() override;
 
 private:
+    // 스위치의 외형을 담당할 스태틱 메시 컴포넌트 추가
+    UPROPERTY(VisibleAnywhere, Category = "Switch")
+    UStaticMeshComponent* SwitchMesh = nullptr;
+
     UPROPERTY(VisibleAnywhere, Category = "Switch")
     UBoxComponent* Trigger = nullptr;
 
@@ -26,7 +32,6 @@ private:
 
     int32 OverlapCount = 0;
 
-    /* 이름 추가! */
     UFUNCTION()
     void OnBegin(UPrimitiveComponent* OverlappedComp,
         AActor* OtherActor,

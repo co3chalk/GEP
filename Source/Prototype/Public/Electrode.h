@@ -1,3 +1,4 @@
+// Electrode.h (수정본)
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -5,6 +6,7 @@
 
 class UBoxComponent;
 class ABattery;
+class UStaticMeshComponent; // <-- 스태틱 메시 컴포넌트 전방 선언
 
 UCLASS()
 class PROTOTYPE_API AElectrode : public AActor
@@ -20,8 +22,12 @@ protected:
 
 private:
     /* ---------- 컴포넌트 ---------- */
+    // 전극의 외형을 담당할 스태틱 메시 컴포넌트 추가
     UPROPERTY(VisibleAnywhere, Category = "Electrode")
-    UBoxComponent* Detector = nullptr; 
+    UStaticMeshComponent* ElectrodeMesh = nullptr;
+
+    UPROPERTY(VisibleAnywhere, Category = "Electrode")
+    UBoxComponent* Detector = nullptr;
 
     /* ---------- 전원 상태 ---------- */
     TWeakObjectPtr<ABattery> ConnectedBattery;
