@@ -1,6 +1,7 @@
 #include "PrototypeCharacter.h"
 #include "Shooter.h"
 #include "ElectricWeapon.h"
+#include "WaterWeapon.h"
 #include "InputManager.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -42,6 +43,7 @@ APrototypeCharacter::APrototypeCharacter()
 	/* 발사체 관련 컴포넌트 생성 */
 	Shooter = CreateDefaultSubobject<UShooter>(TEXT("Shooter"));
 	ElectricWeapon = CreateDefaultSubobject<UElectricWeapon>(TEXT("ElectricWeapon"));
+	WaterWeapon = CreateDefaultSubobject<UWaterWeapon>(TEXT("WaterWeapon"));
 
 	/*인풋 매니저 생성*/
 	InputManager = CreateDefaultSubobject<UInputManager>(TEXT("InputManager"));
@@ -54,7 +56,7 @@ void APrototypeCharacter::BeginPlay()
 
 
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{
+	{ 
 		PC->bShowMouseCursor = true;
 
 		FInputModeGameAndUI Mode;

@@ -37,16 +37,16 @@ void UInputManager::HandleSwapWeapon()
 {
 	//bUseElectric = !bUseElectric;
 	FString MapName = GetWorld()->GetMapName();
-	MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix); // 접두어 제거
+	MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
 
 	if (MapName == TEXT("ElecMap"))
 	{
-		bUseElectric = !bUseElectric;
+		bUseElectric = true;
 		bUseWater = false;
 	}
 	else if (MapName == TEXT("WaterMap"))
 	{
-		bUseWater = !bUseWater;
+		bUseWater = true;
 		bUseElectric = false;
 	}
 }
@@ -68,7 +68,7 @@ void UInputManager::HandleGrab()
 			}
 			else if (bUseWater)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("InputManager calling Water->StartFire()"));
+				UE_LOG(LogTemp, Warning, TEXT("InputManager calling Water->SpawnWater()"));
 				if (Water) Water->StartFire();
 			}
 			else

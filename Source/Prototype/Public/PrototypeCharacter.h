@@ -9,6 +9,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UShooter;
 class UElectricWeapon;
+class UWaterWeapon;
 class UInputManager;
 
 UCLASS()
@@ -85,4 +86,7 @@ private:
 	/* --- 전기공격 담당 컴포넌트 --- */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UElectricWeapon* ElectricWeapon;
+	/* --- 물공격 담당 컴포넌트 --- */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UWaterWeapon* WaterWeapon;
 };

@@ -37,7 +37,6 @@ private:
     /* ---------- 의존 컴포넌트 포인터 ---------- */
     UPROPERTY() UShooter* Shooter = nullptr;
     //UPROPERTY() UFireComponent*  Fire  = nullptr;
-    //UPROPERTY() UWaterComponent* Water = nullptr;
     UPROPERTY() UWaterWeapon* Water = nullptr;
     UPROPERTY() UElectricWeapon* Elec = nullptr;
     
