@@ -1,59 +1,55 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "WaterWeapon.h"
+#include "WaterBullet.h"
+#include "TimerManager.h"
+#include "Engine/World.h"
+#include "GameFramework/Actor.h"
+#include "PrototypeCharacter.h"
 
-// Sets default values for this component's properties
+// 생성자
 UWaterWeapon::UWaterWeapon()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+    PrimaryComponentTick.bCanEverTick = true;
+    FireInterval = 0.1f;
 }
 
-
-// Called when the game starts
+// 시작할 때
 void UWaterWeapon::BeginPlay()
 {
-	Super::BeginPlay();
-
-	// ...
-	
+    Super::BeginPlay();
+    OwnerCharacter = Cast<APrototypeCharacter>(GetOwner());
 }
 
-
-// Called every frame
-void UWaterWeapon::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
-void UWaterWeapon::StartFire()
-{
-	if (!GetWorld()->GetTimerManager().IsTimerActive(FireTimerHandle))
-	{
-		SpawnWater(); // 처음 한 발
-		GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWaterWeapon::SpawnWater, FireInterval, true);
-	}
-}
-
-void UWaterWeapon::StopFire()
-{
-	GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
-}
-
+// 물 총알 발사 함수 (한발 발사)
 void UWaterWeapon::SpawnWater()
 {
-	if (!WaterProjectileClass) return;
+    if (!WaterBulletClass || !GetWorld())
+        return;
 
-	AActor* Owner = GetOwner();
-	if (!Owner) return;
+    FVector SpawnLocation = OwnerCharacter ? OwnerCharacter->GetActorLocation() + OwnerCharacter->GetActorForwardVector() * 100.f : FVector::ZeroVector;
+    FRotator SpawnRotation = OwnerCharacter ? OwnerCharacter->GetActorRotation() : FRotator::ZeroRotator;
 
-	FVector SpawnLoc = Owner->GetActorLocation() + Owner->GetActorForwardVector() * 100.f;
-	FRotator SpawnRot = Owner->GetActorRotation();
-
-	GetWorld()->SpawnActor<AActor>(WaterProjectileClass, SpawnLoc, SpawnRot);
+    AWaterBullet* Bullet = GetWorld()->SpawnActor<AWaterBullet>(WaterBulletClass, SpawnLocation, SpawnRotation);
+    if (Bullet)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("WaterWeapon spawned WaterBullet at %s"), *SpawnLocation.ToString());
+    }
 }
+
+// 연사 시작
+void UWaterWeapon::StartFire()
+{
+    UE_LOG(LogTemp, Warning, TEXT("WaterWeapon StartFire called"));
+
+    // 타이머로 연사
+    GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWaterWeapon::SpawnWater, FireInterval, true, 0.f);
+}
+
+// 연사 중지
+void UWaterWeapon::StopFire()
+{
+    UE_LOG(LogTemp, Warning, TEXT("WaterWeapon StopFire called"));
+
+    GetWorld()->GetTimerManager().ClearTimer(FireTimerHandle);
+}
+
+

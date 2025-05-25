@@ -68,6 +68,7 @@ void UInputManager::HandleGrab()
 			}
 			else if (bUseWater)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("InputManager calling Water->StartFire()"));
 				if (Water) Water->StartFire();
 			}
 			else
