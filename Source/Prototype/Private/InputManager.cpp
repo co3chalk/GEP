@@ -41,12 +41,12 @@ void UInputManager::HandleSwapWeapon()
 
 	if (MapName == TEXT("ElecMap"))
 	{
-		bUseElectric = true;
+		bUseElectric = !bUseElectric;
 		bUseWater = false;
 	}
 	else if (MapName == TEXT("WaterMap"))
 	{
-		bUseWater = true;
+		bUseWater = !bUseWater;
 		bUseElectric = false;
 	}
 }
