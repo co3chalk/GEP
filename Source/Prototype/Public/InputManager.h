@@ -6,7 +6,7 @@
 
 class UShooter;
 //class UFireComponent;
-//class UWaterComponent;
+class UWaterWeapon;
 class UElectricWeapon;
 class APrototypeCharacter;
 
@@ -38,8 +38,11 @@ private:
     UPROPERTY() UShooter* Shooter = nullptr;
     //UPROPERTY() UFireComponent*  Fire  = nullptr;
     //UPROPERTY() UWaterComponent* Water = nullptr;
+    UPROPERTY() UWaterWeapon* Water = nullptr;
     UPROPERTY() UElectricWeapon* Elec = nullptr;
+    
     bool bUseElectric = false;
+    bool bUseWater = false;
 
     bool bLevelCleared = false;
 

@@ -3,7 +3,7 @@
 #include "PrototypeCharacter.h"
 //추가기능 헤더. 주석해제하고, 클래스 이름맞춰 작성하기!
 //#include "FireComponent.h"
-//#include "WaterComponent.h"
+#include "WaterWeapon.h"
 #include "ElectricWeapon.h"
 
 
@@ -18,19 +18,37 @@ void UInputManager::BeginPlay()
 
 	Shooter = GetOwner()->FindComponentByClass<UShooter>();
 	//Fire = GetOwner()->FindComponentByClass<UFireComponent>();
-	//Water = GetOwner()->FindComponentByClass<UWaterComponent>();
+	Water = GetOwner()->FindComponentByClass<UWaterWeapon>();
 	Elec = GetOwner()->FindComponentByClass<UElectricWeapon>();
 	OwnerChar = Cast<APrototypeCharacter>(GetOwner());
 }
 
 UActorComponent* UInputManager::GetActiveComponent() const
 {
-	return bUseElectric ? Cast<UActorComponent>(Elec) : Cast<UActorComponent>(Shooter);
+	//return bUseElectric ? Cast<UActorComponent>(Elec) : Cast<UActorComponent>(Shooter);
+	if (bUseElectric)
+		return Elec;
+	if (bUseWater)
+		return Water;
+	return Shooter;
 }
 
 void UInputManager::HandleSwapWeapon()
 {
-	bUseElectric = !bUseElectric;
+	//bUseElectric = !bUseElectric;
+	FString MapName = GetWorld()->GetMapName();
+	MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix); // 접두어 제거
+
+	if (MapName == TEXT("ElecMap"))
+	{
+		bUseElectric = !bUseElectric;
+		bUseWater = false;
+	}
+	else if (MapName == TEXT("WaterMap"))
+	{
+		bUseWater = !bUseWater;
+		bUseElectric = false;
+	}
 }
 
 void UInputManager::HandleGrab()
@@ -48,6 +66,10 @@ void UInputManager::HandleGrab()
 			{
 				if (Elec) Elec->Fire();
 			}
+			else if (bUseWater)
+			{
+				if (Water) Water->StartFire();
+			}
 			else
 			{
 				if (Shooter) Shooter->Grab();
@@ -63,6 +85,11 @@ void UInputManager::HandleRelease()
 
 	if (!bUseElectric && Shooter)
 		Shooter->Release();
+
+	if (bUseWater)
+	{
+		if (Water) Water->StopFire();
+	}
 }
 
 
