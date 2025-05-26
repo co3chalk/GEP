@@ -38,7 +38,7 @@ AWaterBullet::AWaterBullet()
 void AWaterBullet::BeginPlay()
 {
 	Super::BeginPlay();
-	
+    SetLifeSpan(LifeSpan); // 이 시점에 LifeSpan 값을 반영
 }
 
 // Called every frame

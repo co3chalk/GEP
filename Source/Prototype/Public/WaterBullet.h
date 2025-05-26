@@ -34,6 +34,6 @@ public:
 	class UProjectileMovementComponent* ProjectileMovement;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Lifetime")
-	float LifeSpan = 3.0f;
+	float LifeSpan = 1.0f;
 
 };
