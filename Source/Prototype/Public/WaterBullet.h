@@ -23,9 +23,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// 원기둥 형태 메쉬
+	
+	UPROPERTY(EditAnywhere)
+	class USphereComponent* SphereComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UStaticMeshComponent* MeshComp;
+	class UStaticMeshComponent* MeshComp;
 
 	// 투사체 움직임 컴포넌트 (기본 이동용)
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
