@@ -12,6 +12,9 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "DrawDebugHelpers.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
+#include "UObject/ConstructorHelpers.h"
 
 
 /* ---------- 생성자 ---------- */
@@ -46,6 +49,12 @@ APrototypeCharacter::APrototypeCharacter()
 	ElectricWeapon = CreateDefaultSubobject<UElectricWeapon>(TEXT("ElectricWeapon"));
 	WaterWeapon = CreateDefaultSubobject<UWaterWeapon>(TEXT("WaterWeapon"));
 	FlameWeapon = CreateDefaultSubobject<UFlameWeapon>(TEXT("FlameWeapon"));
+
+	/* 화염방사 관련 메시 컴포넌트 생성 */
+	FlameCylinderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FlameCylinderMesh"));
+	FlameCylinderMesh->SetupAttachment(RootComponent); // 루트에 붙이거나 원하는 본에 붙이기
+	FlameCylinderCollider = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CylinderCollider"));
+	FlameCylinderCollider->SetupAttachment(FlameCylinderMesh);
 
 	/*인풋 매니저 생성*/
 	InputManager = CreateDefaultSubobject<UInputManager>(TEXT("InputManager"));

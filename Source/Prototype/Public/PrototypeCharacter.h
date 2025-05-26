@@ -69,6 +69,7 @@ public:
 	void SetGetWaterEnergy(bool bValue);
 	void SetGetElectricEnergy(bool bValue);
 
+
 private:
 	/* --- 카메라 컴포넌트 --- */
 	UPROPERTY(VisibleAnywhere)
@@ -79,6 +80,14 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* FollowCamera;
+
+	/* --- 화염방사 실린더 및 콜라이더 컴포넌트 --- */
+	UPROPERTY(VisibleAnywhere)
+		class UCapsuleComponent* FlameCylinderCollider;
+	UPROPERTY(VisibleAnywhere)
+		class UStaticMeshComponent* FlameCylinderMesh;
+
+	bool bFlameCylinderVisible = false;
 
 
 	/* --- Grab/Swing 담당 컴포넌트 --- */
