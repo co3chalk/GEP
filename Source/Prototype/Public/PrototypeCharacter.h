@@ -10,6 +10,7 @@ class UCameraComponent;
 class UShooter;
 class UElectricWeapon;
 class UWaterWeapon;
+class UFlameWeapon;
 class UInputManager;
 
 UCLASS()
@@ -55,8 +56,8 @@ public:
 	/* 에너지 관련 bool 변수 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy")	//이거 없어도 될거임 ㅇㅇ
 	bool bGetEnergy = false;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Fire_Energy")
-	bool bGetFireEnergy = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Flame_Energy")
+	bool bGetFlameEnergy = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Water_Energy")
 	bool bGetWaterEnergy = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Elctric_Energy")
@@ -64,7 +65,7 @@ public:
 
 
 	void SetGetEnergy(bool bValue);  
-	void SetGetFireEnergy(bool bValue);
+	void SetGetFlameEnergy(bool bValue);
 	void SetGetWaterEnergy(bool bValue);
 	void SetGetElectricEnergy(bool bValue);
 
@@ -89,4 +90,7 @@ private:
 	/* --- 물공격 담당 컴포넌트 --- */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	UWaterWeapon* WaterWeapon;
+	/* --- 불공격 담당 컴포넌트 --- */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+		UFlameWeapon* FlameWeapon;
 };

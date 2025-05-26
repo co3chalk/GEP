@@ -2,6 +2,7 @@
 #include "Shooter.h"
 #include "ElectricWeapon.h"
 #include "WaterWeapon.h"
+#include "FlameWeapon.h"
 #include "InputManager.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -44,6 +45,7 @@ APrototypeCharacter::APrototypeCharacter()
 	Shooter = CreateDefaultSubobject<UShooter>(TEXT("Shooter"));
 	ElectricWeapon = CreateDefaultSubobject<UElectricWeapon>(TEXT("ElectricWeapon"));
 	WaterWeapon = CreateDefaultSubobject<UWaterWeapon>(TEXT("WaterWeapon"));
+	FlameWeapon = CreateDefaultSubobject<UFlameWeapon>(TEXT("FlameWeapon"));
 
 	/*인풋 매니저 생성*/
 	InputManager = CreateDefaultSubobject<UInputManager>(TEXT("InputManager"));
@@ -194,9 +196,9 @@ void APrototypeCharacter::SetGetEnergy(bool bValue)
 {
 	bGetEnergy = bValue;
 }
-void APrototypeCharacter::SetGetFireEnergy(bool bValue)
+void APrototypeCharacter::SetGetFlameEnergy(bool bValue)
 {
-	bGetFireEnergy = bValue;
+	bGetFlameEnergy = bValue;
 }
 void APrototypeCharacter::SetGetWaterEnergy(bool bValue)
 {
