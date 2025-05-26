@@ -13,20 +13,23 @@ AWaterBullet::AWaterBullet()
 
     CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComp"));
     RootComponent = CollisionComp;
+    CollisionComp->SetGenerateOverlapEvents(true);
     CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     CollisionComp->SetCollisionObjectType(ECC_GameTraceChannel10); // 물총알 전용 채널
 
+
     CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore); // 플레이어 무시
     CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel10, ECR_Ignore); // 다른 물총알 무시
+    CollisionComp->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 
     MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
     MeshComp->SetupAttachment(CollisionComp);
-    MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+   
 
     // Projectile movement 설정
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-    ProjectileMovement->InitialSpeed = 1200.f;
-    ProjectileMovement->MaxSpeed = 1200.f;
+    ProjectileMovement->InitialSpeed = 800.f;
+    ProjectileMovement->MaxSpeed = 800.f;
     ProjectileMovement->bRotationFollowsVelocity = true;
     ProjectileMovement->bShouldBounce = false;
     ProjectileMovement->ProjectileGravityScale = 0.0f; // 중력 영향 제거
@@ -39,6 +42,8 @@ void AWaterBullet::BeginPlay()
 {
 	Super::BeginPlay();
     SetLifeSpan(LifeSpan); // 이 시점에 LifeSpan 값을 반영
+
+    CollisionComp->OnComponentHit.AddDynamic(this, &AWaterBullet::OnHit);
 }
 
 // Called every frame
@@ -48,3 +53,9 @@ void AWaterBullet::Tick(float DeltaTime)
 
 }
 
+void AWaterBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
+    UPrimitiveComponent* OtherComp, FVector NormalImpulse,
+    const FHitResult& Hit)
+{
+    UE_LOG(LogTemp, Warning, TEXT("물총알이 %s에 충돌했습니다."), *OtherActor->GetName());
+}

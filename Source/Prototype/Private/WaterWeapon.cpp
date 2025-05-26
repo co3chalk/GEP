@@ -25,7 +25,7 @@ void UWaterWeapon::SpawnWater()
     if (!WaterBulletClass || !GetWorld())
         return;
 
-    FVector SpawnLocation = OwnerCharacter ? OwnerCharacter->GetActorLocation() + OwnerCharacter->GetActorForwardVector() * 300.f : FVector::ZeroVector;
+    FVector SpawnLocation = OwnerCharacter ? OwnerCharacter->GetActorLocation() + OwnerCharacter->GetActorForwardVector() * 200.f : FVector::ZeroVector;
     FRotator SpawnRotation = OwnerCharacter ? OwnerCharacter->GetActorRotation() : FRotator::ZeroRotator;
 
     AWaterBullet* Bullet = GetWorld()->SpawnActor<AWaterBullet>(WaterBulletClass, SpawnLocation, SpawnRotation);
