@@ -5,7 +5,7 @@
 #include "InputManager.generated.h"
 
 class UShooter;
-//class UFireComponent;
+class UFlameWeapon;
 class UWaterWeapon;
 class UElectricWeapon;
 class APrototypeCharacter;
@@ -36,12 +36,13 @@ private:
 
     /* ---------- 의존 컴포넌트 포인터 ---------- */
     UPROPERTY() UShooter* Shooter = nullptr;
-    //UPROPERTY() UFireComponent*  Fire  = nullptr;
+    UPROPERTY() UFlameWeapon* Flame = nullptr;
     UPROPERTY() UWaterWeapon* Water = nullptr;
     UPROPERTY() UElectricWeapon* Elec = nullptr;
     
     bool bUseElectric = false;
     bool bUseWater = false;
+    bool bUseFlame = false;
 
     bool bLevelCleared = false;
 

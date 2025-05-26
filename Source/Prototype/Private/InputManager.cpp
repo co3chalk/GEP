@@ -5,6 +5,7 @@
 //#include "FireComponent.h"
 #include "WaterWeapon.h"
 #include "ElectricWeapon.h"
+#include "FlameWeapon.h"
 
 
 UInputManager::UInputManager()
@@ -17,7 +18,7 @@ void UInputManager::BeginPlay()
 	Super::BeginPlay();
 
 	Shooter = GetOwner()->FindComponentByClass<UShooter>();
-	//Fire = GetOwner()->FindComponentByClass<UFireComponent>();
+	Flame = GetOwner()->FindComponentByClass<UFlameWeapon>();
 	Water = GetOwner()->FindComponentByClass<UWaterWeapon>();
 	Elec = GetOwner()->FindComponentByClass<UElectricWeapon>();
 	OwnerChar = Cast<APrototypeCharacter>(GetOwner());
@@ -30,6 +31,8 @@ UActorComponent* UInputManager::GetActiveComponent() const
 		return Elec;
 	if (bUseWater)
 		return Water;
+	if (bUseFlame)
+		return Flame;
 	return Shooter;
 }
 
@@ -43,11 +46,19 @@ void UInputManager::HandleSwapWeapon()
 	{
 		bUseElectric = !bUseElectric;
 		bUseWater = false;
+		bUseFlame = false;
 	}
 	else if (MapName == TEXT("WaterMap"))
 	{
 		bUseWater = !bUseWater;
 		bUseElectric = false;
+		bUseFlame = false;
+	}
+	else if (MapName == TEXT("FlameMap"))
+	{
+		bUseFlame = !bUseFlame;
+		bUseElectric = false;
+		bUseWater = false;
 	}
 }
 
@@ -70,6 +81,11 @@ void UInputManager::HandleGrab()
 			{
 				UE_LOG(LogTemp, Warning, TEXT("InputManager calling Water->SpawnWater()"));
 				if (Water) Water->StartFire();
+			}
+			else if (bUseFlame)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("InputManager calling Flame->Fire()"));
+				if (Flame) Flame->Fire();
 			}
 			else
 			{
