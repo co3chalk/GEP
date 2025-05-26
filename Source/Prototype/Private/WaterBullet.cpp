@@ -11,25 +11,27 @@ AWaterBullet::AWaterBullet()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-    // 메쉬 컴포넌트 생성 및 루트 지정
-    SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
-    RootComponent = SphereComp;
+    CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComp"));
+    RootComponent = CollisionComp;
+    CollisionComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+    CollisionComp->SetCollisionObjectType(ECC_GameTraceChannel10); // 물총알 전용 채널
 
-    // 충돌은 필요하다면 여기서 세팅 가능
-    SphereComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-    //본인은 겹침
-    //나머지는 블록
-    //발사 속도 증가
-    //meshComp추가
+    CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore); // 플레이어 무시
+    CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel10, ECR_Ignore); // 다른 물총알 무시
 
-    // 투사체 움직임 컴포넌트 생성
+    MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
+    MeshComp->SetupAttachment(CollisionComp);
+    MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+    // Projectile movement 설정
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
     ProjectileMovement->InitialSpeed = 1200.f;
     ProjectileMovement->MaxSpeed = 1200.f;
     ProjectileMovement->bRotationFollowsVelocity = true;
     ProjectileMovement->bShouldBounce = false;
+    ProjectileMovement->ProjectileGravityScale = 0.0f; // 중력 영향 제거
 
-    InitialLifeSpan = LifeSpan; // LifeSpan초 뒤 자동 파괴
+    InitialLifeSpan = LifeSpan;
 }
 
 // Called when the game starts or when spawned

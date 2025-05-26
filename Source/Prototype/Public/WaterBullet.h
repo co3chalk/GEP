@@ -24,17 +24,16 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	
-	UPROPERTY(EditAnywhere)
-	class USphereComponent* SphereComp;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, Category = "Components")
+	class USphereComponent* CollisionComp;
+
+	UPROPERTY(EditAnywhere, Category = "Components")
 	class UStaticMeshComponent* MeshComp;
 
-	// 투사체 움직임 컴포넌트 (기본 이동용)
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, Category = "Movement")
 	class UProjectileMovementComponent* ProjectileMovement;
 
-	// 투사체 생존 시간 (초)
-	UPROPERTY(EditDefaultsOnly, Category = "WaterBullet")
+	UPROPERTY(EditDefaultsOnly, Category = "Lifetime")
 	float LifeSpan = 3.0f;
 
 };

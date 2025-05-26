@@ -25,14 +25,11 @@ void UWaterWeapon::SpawnWater()
     if (!WaterBulletClass || !GetWorld())
         return;
 
-    FVector SpawnLocation = OwnerCharacter ? OwnerCharacter->GetActorLocation() + OwnerCharacter->GetActorForwardVector() * 100.f : FVector::ZeroVector;
+    FVector SpawnLocation = OwnerCharacter ? OwnerCharacter->GetActorLocation() + OwnerCharacter->GetActorForwardVector() * 500.f : FVector::ZeroVector;
     FRotator SpawnRotation = OwnerCharacter ? OwnerCharacter->GetActorRotation() : FRotator::ZeroRotator;
 
     AWaterBullet* Bullet = GetWorld()->SpawnActor<AWaterBullet>(WaterBulletClass, SpawnLocation, SpawnRotation);
-    if (Bullet)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("WaterWeapon spawned WaterBullet at %s"), *SpawnLocation.ToString());
-    }
+
 }
 
 // 연사 시작
