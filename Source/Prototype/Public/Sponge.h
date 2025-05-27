@@ -29,16 +29,17 @@ public:
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* staticMesh;
 
-	UPROPERTY(EditAnywhere)
-	UPhysicsConstraintComponent* RopeConstraint;
+	UPROPERTY(EditAnywhere, Category = "Weight")
+	float CurrentWeight = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics")
+	UPROPERTY(EditAnywhere, Category = "Weight")
 	float WeightThreshold = 10.0f;
 
 
 	UFUNCTION()
-	void OnBulletHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
-		UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+	void OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	float CurrentWeight = 0.0f;
+	void LockMotion();
+	void UnLockMotion();
 };

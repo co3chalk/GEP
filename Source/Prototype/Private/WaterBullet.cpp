@@ -21,6 +21,7 @@ AWaterBullet::AWaterBullet()
     CollisionComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore); // 플레이어 무시
     CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel10, ECR_Ignore); // 다른 물총알 무시
     CollisionComp->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+    CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel11, ECR_Overlap); // 스펀지랑만 겹침
 
     MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
     MeshComp->SetupAttachment(CollisionComp);
