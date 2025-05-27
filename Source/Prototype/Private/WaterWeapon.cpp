@@ -31,6 +31,9 @@ void UWaterWeapon::SpawnWater()
     FVector SpawnLocation = OwnerCharacter ? OwnerCharacter->GetActorLocation() + Forward * 100.f + Right * 18.f : FVector::ZeroVector;
     FRotator SpawnRotation = OwnerCharacter ? OwnerCharacter->GetActorRotation() : FRotator::ZeroRotator;
 
+    float RandomYawOffset = FMath::FRandRange(-5.0f, 5.0f);
+    SpawnRotation.Yaw += RandomYawOffset;
+
     AWaterBullet* Bullet = GetWorld()->SpawnActor<AWaterBullet>(WaterBulletClass, SpawnLocation, SpawnRotation);
 
 }
