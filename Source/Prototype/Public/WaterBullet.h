@@ -34,11 +34,14 @@ public:
 	class UProjectileMovementComponent* ProjectileMovement;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Lifetime")
-	float LifeSpan = 1.0f;
+	float LifeSpan = 2.0f;
 
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
 		const FHitResult& Hit);
 
+	FTimerHandle DestroyTimerHandle;
+	bool bIsDestroyTimerSet = false;
+	void DestroyBullet();
 };

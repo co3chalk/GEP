@@ -29,8 +29,8 @@ AWaterBullet::AWaterBullet()
 
     // Projectile movement 설정
     ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
-    ProjectileMovement->InitialSpeed = 800.f;
-    ProjectileMovement->MaxSpeed = 800.f;
+    ProjectileMovement->InitialSpeed = 700.f;
+    ProjectileMovement->MaxSpeed = 700.f;
     ProjectileMovement->bRotationFollowsVelocity = true;
     ProjectileMovement->bShouldBounce = false;
     ProjectileMovement->ProjectileGravityScale = 0.0f; // 중력 영향 제거
@@ -52,8 +52,32 @@ void AWaterBullet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-}
+    if (ProjectileMovement)
+    {
+        FVector Velocity = ProjectileMovement->Velocity;
+        float Speed = Velocity.Size();
 
+        // 최소 속도 제한
+        float MinSpeed = 100.f;
+        float Deceleration = 300.f; // 초당 줄어드는 속도량
+
+        if (Speed > MinSpeed)
+        {
+            float NewSpeed = FMath::Max(Speed - Deceleration * DeltaTime, MinSpeed);
+            ProjectileMovement->Velocity = Velocity.GetSafeNormal() * NewSpeed;
+        }
+        else if (!bIsDestroyTimerSet)
+        {
+            // 아직 타이머가 안 걸렸으면 0.2초 후 Destroy
+            bIsDestroyTimerSet = true;
+            GetWorldTimerManager().SetTimer(DestroyTimerHandle, this, &AWaterBullet::DestroyBullet, 0.2f, false);
+        }
+    }
+}
+void AWaterBullet::DestroyBullet()
+{
+    Destroy();
+}
 void AWaterBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
     UPrimitiveComponent* OtherComp, FVector NormalImpulse,
     const FHitResult& Hit)
