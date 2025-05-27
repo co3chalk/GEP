@@ -2,6 +2,8 @@
 
 
 #include "FlameWeapon.h"
+#include "PrototypeCharacter.h" // APrototypeCharacter 헤더 추가
+#include "Engine/World.h"
 
 // Sets default values for this component's properties
 UFlameWeapon::UFlameWeapon()
@@ -18,7 +20,7 @@ UFlameWeapon::UFlameWeapon()
 void UFlameWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-
+	OwnerChar = Cast<APrototypeCharacter>(GetOwner());
 	// ...
 	
 }
@@ -35,4 +37,30 @@ void UFlameWeapon::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 void UFlameWeapon::Fire()
 {
 	UE_LOG(LogTemp, Warning, TEXT("FlameWeapon Fire called"));
+}
+
+void UFlameWeapon::StartFire()
+{
+	if (OwnerChar)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("StartFire: Showing flame cylinder"));
+		OwnerChar->SetFlameCylinderVisible(true);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("StartFire: OwnerChar is null"));
+	}
+}
+
+void UFlameWeapon::StopFire()
+{
+	if (OwnerChar)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("StopFire: Hiding flame cylinder"));
+		OwnerChar->SetFlameCylinderVisible(false);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("StopFire: OwnerChar is null"));
+	}
 }

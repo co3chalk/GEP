@@ -69,6 +69,9 @@ public:
 	void SetGetWaterEnergy(bool bValue);
 	void SetGetElectricEnergy(bool bValue);
 
+	/* --- 불기둥 제어함수(FlameWeapon에서 호출) --- */
+	void SetFlameCylinderVisible(bool bVisible);
+
 
 private:
 	/* --- 카메라 컴포넌트 --- */

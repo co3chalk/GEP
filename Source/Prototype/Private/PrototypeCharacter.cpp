@@ -56,6 +56,10 @@ APrototypeCharacter::APrototypeCharacter()
 	FlameCylinderCollider = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CylinderCollider"));
 	FlameCylinderCollider->SetupAttachment(FlameCylinderMesh);
 
+	FlameCylinderMesh->SetHiddenInGame(true);	// 처음에 꺼진 상태로 설정
+	FlameCylinderCollider->SetHiddenInGame(true);
+	FlameCylinderCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	/*인풋 매니저 생성*/
 	InputManager = CreateDefaultSubobject<UInputManager>(TEXT("InputManager"));
 }
@@ -74,6 +78,16 @@ void APrototypeCharacter::BeginPlay()
 		Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		Mode.SetHideCursorDuringCapture(false);
 		PC->SetInputMode(Mode);
+	}
+
+	/* --- 화염방사 비활성화 --- */
+	if (FlameCylinderMesh)
+		FlameCylinderMesh->SetHiddenInGame(true);
+
+	if (FlameCylinderCollider)
+	{
+		FlameCylinderCollider->SetHiddenInGame(true);
+		FlameCylinderCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
@@ -216,4 +230,13 @@ void APrototypeCharacter::SetGetWaterEnergy(bool bValue)
 void APrototypeCharacter::SetGetElectricEnergy(bool bValue)
 {
 	bGetElectricEnergy = bValue;
+}
+
+void APrototypeCharacter::SetFlameCylinderVisible(bool bVisible)
+{
+	if (!FlameCylinderMesh || !FlameCylinderCollider) return;
+
+	FlameCylinderMesh->SetHiddenInGame(!bVisible);
+	FlameCylinderCollider->SetHiddenInGame(!bVisible);
+	FlameCylinderCollider->SetCollisionEnabled(bVisible ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
 }

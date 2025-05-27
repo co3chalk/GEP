@@ -85,7 +85,7 @@ void UInputManager::HandleGrab()
 			else if (bUseFlame)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("InputManager calling Flame->Fire()"));
-				if (Flame) Flame->Fire();
+				if (Flame) Flame->StartFire();
 			}
 			else
 			{
@@ -106,6 +106,10 @@ void UInputManager::HandleRelease()
 	if (bUseWater)
 	{
 		if (Water) Water->StopFire();
+	}
+	if (bUseFlame)
+	{
+		if (Flame) Flame->StopFire();
 	}
 }
 
