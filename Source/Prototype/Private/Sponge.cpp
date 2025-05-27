@@ -84,6 +84,11 @@ void ASponge::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
         {
             UnLockMotion();
             staticMesh->SetSimulatePhysics(true);
+
+            if (ChangedMaterial)
+            {
+                staticMesh->SetMaterial(0, ChangedMaterial);
+            }
         }
 
         OtherActor->Destroy();
