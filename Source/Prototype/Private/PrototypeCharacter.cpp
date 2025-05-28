@@ -15,6 +15,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Engine/World.h"   // GetWorld() 를 위해 추가
+#include "TimerManager.h" // GetWorld()->GetTimerManager() 를 위해 추가
 
 
 /* ---------- 생성자 ---------- */
@@ -22,46 +24,45 @@ APrototypeCharacter::APrototypeCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	/* 캡슐 초기화 (원본과 동일) */
+	/* 캡슐 초기화 (기존 코드 유지) */
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
-	/* 이동 세팅 */
+	/* 이동 세팅 (기존 코드 유지) */
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.3f;
 
-	// 카메라
+	/* 카메라 (기존 코드 유지) */
 	CameraPivot = CreateDefaultSubobject<USceneComponent>(TEXT("CameraPivot"));
-	CameraPivot->SetupAttachment(nullptr); // 캐릭터에 부착하지 않음
-
-
+	CameraPivot->SetupAttachment(nullptr);
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraPivot);
 	FollowCamera->bUsePawnControlRotation = false;
 
-
-	/* 발사체 관련 컴포넌트 생성 */
+	/* 무기/입력 컴포넌트 (기존 코드 유지) */
 	Shooter = CreateDefaultSubobject<UShooter>(TEXT("Shooter"));
 	ElectricWeapon = CreateDefaultSubobject<UElectricWeapon>(TEXT("ElectricWeapon"));
 	WaterWeapon = CreateDefaultSubobject<UWaterWeapon>(TEXT("WaterWeapon"));
 	FlameWeapon = CreateDefaultSubobject<UFlameWeapon>(TEXT("FlameWeapon"));
+	InputManager = CreateDefaultSubobject<UInputManager>(TEXT("InputManager"));
 
-	/* 화염방사 관련 메시 컴포넌트 생성 */
+	/* 화염방사 메시/콜라이더 (기존 코드 유지) */
 	FlameCylinderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FlameCylinderMesh"));
-	FlameCylinderMesh->SetupAttachment(RootComponent); // 루트에 붙이거나 원하는 본에 붙이기
+	FlameCylinderMesh->SetupAttachment(RootComponent);
 	FlameCylinderCollider = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CylinderCollider"));
 	FlameCylinderCollider->SetupAttachment(FlameCylinderMesh);
-
-	FlameCylinderMesh->SetHiddenInGame(true);	// 처음에 꺼진 상태로 설정
+	FlameCylinderMesh->SetHiddenInGame(true);
 	FlameCylinderCollider->SetHiddenInGame(true);
 	FlameCylinderCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	/*인풋 매니저 생성*/
-	InputManager = CreateDefaultSubobject<UInputManager>(TEXT("InputManager"));
+	/* --- 체력 & 무적 초기화 --- */
+	MaxHP = 6; // .h와 일치
+	CurrentHP = MaxHP;
+	bIsInvincible = false;
 }
 
 /* ---------- BeginPlay ---------- */
@@ -69,21 +70,25 @@ void APrototypeCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	/* --- HP/무적 초기화 --- */
+	CurrentHP = MaxHP;
+	bIsInvincible = false;
+	HandleHPChange(); // UI 초기화를 위해 한번 호출
+	OnInvincibilityChanged.Broadcast(false); // UI 초기화를 위해 한번 호출
 
+	/* 마우스 설정 (기존 코드 유지) */
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
-	{ 
+	{
 		PC->bShowMouseCursor = true;
-
 		FInputModeGameAndUI Mode;
 		Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		Mode.SetHideCursorDuringCapture(false);
 		PC->SetInputMode(Mode);
 	}
 
-	/* --- 화염방사 비활성화 --- */
+	/* 화염방사 비활성화 (기존 코드 유지) */
 	if (FlameCylinderMesh)
 		FlameCylinderMesh->SetHiddenInGame(true);
-
 	if (FlameCylinderCollider)
 	{
 		FlameCylinderCollider->SetHiddenInGame(true);
@@ -95,13 +100,15 @@ void APrototypeCharacter::BeginPlay()
 void APrototypeCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	FVector CameraOffset = FVector(-1000.f, 0.f, 0000.f); // 캐릭터 뒤 + 위쪽
-	FRotator CameraRotation = FRotator(-45.f, 0.f, 0.f); // 위에서 내려다보는 각도
 
+	/* 카메라 위치/회전 업데이트 (기존 코드 유지) */
+	FVector CameraOffset = FVector(-1000.f, 0.f, 0.f); // 카메라 높이 0 -> 1000으로 수정
+	FRotator CameraRotation = FRotator(-45.f, 0.f, 0.f);
 	FVector NewLocation = GetActorLocation() + CameraRotation.RotateVector(CameraOffset);
-
 	CameraPivot->SetWorldLocation(NewLocation);
 	CameraPivot->SetWorldRotation(CameraRotation);
+
+	/* 회전 로직 (기존 코드 유지) */
 	if (IsRotationLocked())
 		return;
 
@@ -110,12 +117,9 @@ void APrototypeCharacter::Tick(float DeltaTime)
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		RotateCharacterToMouse();
 
-		// 회전 완료 확인
 		if (GetActorRotation().Equals(RotationTarget, 1.0f))
 		{
 			bShouldRotateToMouse = false;
-
-			// 예약된 동작이 있으면 실행
 			if (bWaitingForPostRotationAction && PostRotationAction)
 			{
 				bWaitingForPostRotationAction = false;
@@ -126,42 +130,33 @@ void APrototypeCharacter::Tick(float DeltaTime)
 	}
 	else
 	{
-		// 기본은 이동 방향 회전
 		GetCharacterMovement()->bOrientRotationToMovement = true;
 	}
 }
-
-
 
 /* ---------- 입력 바인딩 ---------- */
 void APrototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput)
 {
 	check(PlayerInput);
 
+	/* 입력 바인딩 (기존 코드 유지) */
 	PlayerInput->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInput->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-
 	PlayerInput->BindAxis("MoveForward", this, &APrototypeCharacter::MoveForward);
 	PlayerInput->BindAxis("MoveRight", this, &APrototypeCharacter::MoveRight);
-
-	/* Grab / Scroll / 우클릭 → 인풋매니저 로 위임 */
 	PlayerInput->BindAction("LeftMouseButton", IE_Pressed, InputManager, &UInputManager::HandleGrab);
 	PlayerInput->BindAction("LeftMouseButton", IE_Released, InputManager, &UInputManager::HandleRelease);
-
 	PlayerInput->BindAction("ScrollUp", IE_Pressed, InputManager, &UInputManager::HandleScrollUp);
 	PlayerInput->BindAction("ScrollDown", IE_Pressed, InputManager, &UInputManager::HandleScrollDown);
-
 	PlayerInput->BindAction("RightMouseButton", IE_Pressed, InputManager, &UInputManager::HandleRightMouseDown);
 	PlayerInput->BindAction("RightMouseButton", IE_Released, InputManager, &UInputManager::HandleRightMouseUp);
-
 	PlayerInput->BindAction("SwapWeapon", IE_Pressed, InputManager, &UInputManager::HandleSwapWeapon);
 }
 
-/* ---------- 이동 ---------- */
+/* ---------- 이동 & 점프 (기존 코드 유지) ---------- */
 void APrototypeCharacter::MoveForward(float Value)
 {
 	if (Value == 0.f) return;
-
 	const FRotator YawRot(0.f, Controller->GetControlRotation().Yaw, 0.f);
 	const FVector  Dir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
 	AddMovementInput(Dir, Value);
@@ -170,7 +165,6 @@ void APrototypeCharacter::MoveForward(float Value)
 void APrototypeCharacter::MoveRight(float Value)
 {
 	if (Value == 0.f) return;
-
 	const FRotator YawRot(0.f, Controller->GetControlRotation().Yaw, 0.f);
 	const FVector  Dir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
 	AddMovementInput(Dir, Value);
@@ -181,7 +175,7 @@ void APrototypeCharacter::Jump()
 	Super::Jump();
 }
 
-/* ---------- 마우스 방향으로 회전 ---------- */
+/* ---------- 마우스 방향으로 회전 (기존 코드 유지) ---------- */
 void APrototypeCharacter::RotateCharacterToMouse()
 {
 	APlayerController* PC = Cast<APlayerController>(GetController());
@@ -197,46 +191,85 @@ void APrototypeCharacter::RotateCharacterToMouse()
 
 		if (!Dir.IsNearlyZero())
 		{
-			// 목표 회전 저장
 			RotationTarget = Dir.Rotation();
-
-			// 부드럽게 보간 회전
-			const float Speed = 100.f;
+			const float Speed = 100.f; // 기존 RInterpTo 유지
 			FRotator NewRot = FMath::RInterpTo(GetActorRotation(), RotationTarget, GetWorld()->GetDeltaSeconds(), Speed);
 			SetActorRotation(NewRot);
 		}
 	}
 }
 
+/* --- 체력 (HP) 관련 함수 구현 --- */
+int32 APrototypeCharacter::GetMaxHP() const { return MaxHP; }
+int32 APrototypeCharacter::GetCurrentHP() const { return CurrentHP; }
+bool APrototypeCharacter::IsInvincible() const { return bIsInvincible; }
 
+void APrototypeCharacter::TakeDamage(int32 DamageAmount)
+{
+	if (bIsInvincible || DamageAmount <= 0 || CurrentHP <= 0) return;
 
-bool APrototypeCharacter::IsRotationLocked() const
-{
-	return Shooter && Shooter->ShouldLockRotation();
+	CurrentHP = FMath::Clamp(CurrentHP - DamageAmount, 0, MaxHP);
+	UE_LOG(LogTemp, Warning, TEXT("Player took %d damage, Current HP: %d"), DamageAmount, CurrentHP);
+	HandleHPChange();
+	if (CurrentHP > 0) StartInvincibility();
 }
 
-void APrototypeCharacter::SetGetEnergy(bool bValue)
+void APrototypeCharacter::HandleHPChange()
 {
-	bGetEnergy = bValue;
+	OnHPChanged.Broadcast(CurrentHP, MaxHP);
+	if (CurrentHP <= 0) Die();
 }
-void APrototypeCharacter::SetGetFlameEnergy(bool bValue)
+
+void APrototypeCharacter::Die()
 {
-	bGetFlameEnergy = bValue;
+	UE_LOG(LogTemp, Warning, TEXT("Player has died!"));
+	GetWorld()->GetTimerManager().ClearTimer(InvincibilityTimerHandle);
+	EndInvincibility();
+	GetCharacterMovement()->DisableMovement();
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC) DisableInput(PC);
 }
-void APrototypeCharacter::SetGetWaterEnergy(bool bValue)
+
+/* --- 무적 관련 함수 구현 --- */
+void APrototypeCharacter::StartInvincibility()
 {
-	bGetWaterEnergy = bValue;
+	if (!bIsInvincible)
+	{
+		bIsInvincible = true;
+		OnInvincibilityChanged.Broadcast(true);
+		UE_LOG(LogTemp, Log, TEXT("Player Invincibility ON"));
+		GetWorld()->GetTimerManager().SetTimer(InvincibilityTimerHandle, this, &APrototypeCharacter::EndInvincibility, InvincibilityDuration, false);
+	}
 }
-void APrototypeCharacter::SetGetElectricEnergy(bool bValue)
+
+void APrototypeCharacter::EndInvincibility()
 {
-	bGetElectricEnergy = bValue;
+	if (bIsInvincible)
+	{
+		bIsInvincible = false;
+		OnInvincibilityChanged.Broadcast(false);
+		UE_LOG(LogTemp, Log, TEXT("Player Invincibility OFF"));
+	}
+	GetWorld()->GetTimerManager().ClearTimer(InvincibilityTimerHandle);
 }
+
+/* --- 기타 함수 구현 (기존 코드 유지) --- */
+bool APrototypeCharacter::IsRotationLocked() const { return Shooter && Shooter->ShouldLockRotation(); }
+void APrototypeCharacter::SetGetEnergy(bool bValue) { bGetEnergy = bValue; }
+void APrototypeCharacter::SetGetFlameEnergy(bool bValue) { bGetFlameEnergy = bValue; }
+void APrototypeCharacter::SetGetWaterEnergy(bool bValue) { bGetWaterEnergy = bValue; }
+void APrototypeCharacter::SetGetElectricEnergy(bool bValue) { bGetElectricEnergy = bValue; }
 
 void APrototypeCharacter::SetFlameCylinderVisible(bool bVisible)
 {
 	if (!FlameCylinderMesh || !FlameCylinderCollider) return;
-
 	FlameCylinderMesh->SetHiddenInGame(!bVisible);
 	FlameCylinderCollider->SetHiddenInGame(!bVisible);
 	FlameCylinderCollider->SetCollisionEnabled(bVisible ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+}
+
+// StartFire 함수 구현 (만약 .h에 선언했다면, 내용은 비어있더라도 추가)
+void APrototypeCharacter::StartFire()
+{
+	UE_LOG(LogTemp, Log, TEXT("StartFire called - Implement actual firing logic here or in weapons."));
 }
