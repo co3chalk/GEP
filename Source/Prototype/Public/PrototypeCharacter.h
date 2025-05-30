@@ -121,8 +121,9 @@ private:
 	UPROPERTY(VisibleAnywhere) UCameraComponent* FollowCamera;
 
 	/* --- 화염방사 실린더 및 콜라이더 (기존 코드 유지) --- */
-	UPROPERTY(VisibleAnywhere) class UCapsuleComponent* FlameCylinderCollider;
 	UPROPERTY(VisibleAnywhere) class UStaticMeshComponent* FlameCylinderMesh;
+	UPROPERTY(VisibleAnywhere, Category = "Flame")
+	UCapsuleComponent* FlameCollider;
 	bool bFlameCylinderVisible = false;
 
 	/* --- 무기 컴포넌트 (기존 코드 유지) --- */

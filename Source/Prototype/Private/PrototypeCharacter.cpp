@@ -53,11 +53,14 @@ APrototypeCharacter::APrototypeCharacter()
 	/* 화염방사 메시/콜라이더 (기존 코드 유지) */
 	FlameCylinderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FlameCylinderMesh"));
 	FlameCylinderMesh->SetupAttachment(RootComponent);
-	FlameCylinderCollider = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CylinderCollider"));
-	FlameCylinderCollider->SetupAttachment(FlameCylinderMesh);
 	FlameCylinderMesh->SetHiddenInGame(true);
-	FlameCylinderCollider->SetHiddenInGame(true);
-	FlameCylinderCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	FlameCollider = CreateDefaultSubobject<UCapsuleComponent>(TEXT("FlameCollider"));
+	FlameCollider->SetupAttachment(FlameCylinderMesh);
+	FlameCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 초기엔 비활성
+	FlameCollider->SetCollisionResponseToAllChannels(ECR_Ignore);
+	FlameCollider->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Overlap);
+	FlameCollider->SetGenerateOverlapEvents(true);
+	FlameCollider->ComponentTags.Add(FName("Flame")); // 태그로 구분
 
 	/* --- 체력 & 무적 초기화 --- */
 	MaxHP = 6; // .h와 일치
@@ -89,11 +92,6 @@ void APrototypeCharacter::BeginPlay()
 	/* 화염방사 비활성화 (기존 코드 유지) */
 	if (FlameCylinderMesh)
 		FlameCylinderMesh->SetHiddenInGame(true);
-	if (FlameCylinderCollider)
-	{
-		FlameCylinderCollider->SetHiddenInGame(true);
-		FlameCylinderCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
 }
 
 /* ---------- Tick ---------- */
@@ -262,10 +260,11 @@ void APrototypeCharacter::SetGetElectricEnergy(bool bValue) { bGetElectricEnergy
 
 void APrototypeCharacter::SetFlameCylinderVisible(bool bVisible)
 {
-	if (!FlameCylinderMesh || !FlameCylinderCollider) return;
+	if (!FlameCylinderMesh || !FlameCollider) return;
+
 	FlameCylinderMesh->SetHiddenInGame(!bVisible);
-	FlameCylinderCollider->SetHiddenInGame(!bVisible);
-	FlameCylinderCollider->SetCollisionEnabled(bVisible ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+
+	FlameCollider->SetCollisionEnabled(bVisible ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 }
 
 // StartFire 함수 구현 (만약 .h에 선언했다면, 내용은 비어있더라도 추가)
