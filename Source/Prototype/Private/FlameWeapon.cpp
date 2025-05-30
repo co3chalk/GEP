@@ -4,6 +4,8 @@
 #include "FlameWeapon.h"
 #include "PrototypeCharacter.h" // APrototypeCharacter 헤더 추가
 #include "Engine/World.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
 
 // Sets default values for this component's properties
 UFlameWeapon::UFlameWeapon()
@@ -45,6 +47,16 @@ void UFlameWeapon::StartFire()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("StartFire: Showing flame cylinder"));
 		OwnerChar->SetFlameCylinderVisible(true);
+
+
+		/* 포기포기포기
+		OwnerChar->GetCharacterMovement()->bOrientRotationToMovement = false;
+		OwnerChar->bUseControllerRotationYaw = false;
+		FVector CurrentVelocity = OwnerChar->GetCharacterMovement()->Velocity;
+		CurrentVelocity.X = 0.0f;
+		CurrentVelocity.Y = 0.0f;
+		OwnerChar->GetCharacterMovement()->Velocity = CurrentVelocity;
+		*/
 	}
 	else
 	{
