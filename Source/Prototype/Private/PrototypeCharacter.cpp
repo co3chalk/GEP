@@ -15,8 +15,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "UObject/ConstructorHelpers.h"
-#include "Engine/World.h"   // GetWorld() 를 위해 추가
-#include "TimerManager.h" // GetWorld()->GetTimerManager() 를 위해 추가
+#include "Engine/World.h" 
+#include "TimerManager.h"
 
 
 /* ---------- 생성자 ---------- */
