@@ -283,7 +283,7 @@ FString APrototypeCharacter::GetCurrentWeaponName() const
 		// InputManager의 새로운 public getter 함수들을 사용
 		if (InputManager->IsElectricWeaponActive()) return TEXT("Electric Gun");
 		if (InputManager->IsWaterWeaponActive())   return TEXT("Water Gun");
-		if (InputManager->IsFlameWeaponActive())   return TEXT("Flame Thrower");
+		if (InputManager->IsFlameWeaponActive())   return TEXT("Flame Gun");
 	}
 	return TEXT("Shooter"); // 기본값 또는 InputManager가 없을 경우
 }

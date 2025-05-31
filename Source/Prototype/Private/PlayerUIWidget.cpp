@@ -41,7 +41,7 @@ void UPlayerUIWidget::HandleHealthChanged(int32 CurrentHP, int32 MaxHP)
 {
     if (HPDisplayText != nullptr)
     {
-        FString HealthString = FString::Printf(TEXT("HP: %d / %d"), CurrentHP, MaxHP);
+        FString HealthString = FString::Printf(TEXT("HP : %d / %d"), CurrentHP, MaxHP);
         HPDisplayText->SetText(FText::FromString(HealthString));
     }
     else
@@ -59,7 +59,7 @@ void UPlayerUIWidget::UpdateCurrentWeaponText(const FString& WeaponName)
 {
     if (CurrentWeaponText != nullptr)
     {
-        FString WeaponDisplayString = FString::Printf(TEXT("Weapon: %s"), *WeaponName);
+        FString WeaponDisplayString = FString::Printf(TEXT("Weapon : %s"), *WeaponName);
         CurrentWeaponText->SetText(FText::FromString(WeaponDisplayString));
         UE_LOG(LogTemp, Log, TEXT("PlayerUIWidget: CurrentWeaponText updated to: %s"), *WeaponDisplayString);
     }
