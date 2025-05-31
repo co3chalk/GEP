@@ -10,23 +10,21 @@
 
 AElecBullet::AElecBullet()
 {
-    // ... (이전과 동일)
     Collision = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
     RootComponent = Collision;
     Collision->InitSphereRadius(12.f);
+    // OnComponentHit 바인딩 시 UFUNCTION() 매크로가 붙은 함수와 시그니처가 일치해야 합니다.
+    // 헤더 파일의 OnHit 함수 선언에 UFUNCTION()이 있고, 파라미터가 올바른지 확인하세요.
     Collision->OnComponentHit.AddDynamic(this, &AElecBullet::OnHit);
 
     Collision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-    Collision->SetCollisionObjectType(ECC_GameTraceChannel1);   // "Bullet" 채널
+    Collision->SetCollisionObjectType(ECC_GameTraceChannel1);    // "Bullet" 채널
 
     Collision->SetCollisionResponseToAllChannels(ECR_Ignore);
-    Collision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+    Collision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore); // 이미 Pawn을 무시하도록 설정되어 있음
     Collision->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
     Collision->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
     Collision->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECR_Overlap); // Enemy 전용
-
-    // Battery 오브젝트 타입에 대한 응답 추가:
-    // 만약 Battery가 ECC_PhysicsBody 타입으로 설정되었다면:
     Collision->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Block);
 
     Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
