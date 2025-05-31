@@ -1,8 +1,6 @@
 #include "InputManager.h"
 #include "Shooter.h"
 #include "PrototypeCharacter.h"
-//추가기능 헤더. 주석해제하고, 클래스 이름맞춰 작성하기!
-//#include "FireComponent.h"
 #include "WaterWeapon.h"
 #include "ElectricWeapon.h"
 #include "FlameWeapon.h"
@@ -38,7 +36,6 @@ UActorComponent* UInputManager::GetActiveComponent() const
 
 void UInputManager::HandleSwapWeapon()
 {
-	//bUseElectric = !bUseElectric;
 	FString MapName = GetWorld()->GetMapName();
 	MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
 
@@ -59,6 +56,11 @@ void UInputManager::HandleSwapWeapon()
 		bUseFlame = !bUseFlame;
 		bUseElectric = false;
 		bUseWater = false;
+	}
+
+	if (OwnerChar) //
+	{
+		OwnerChar->NotifyWeaponChanged();
 	}
 }
 

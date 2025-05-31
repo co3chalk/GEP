@@ -79,6 +79,9 @@ void APrototypeCharacter::BeginPlay()
 	HandleHPChange(); // UI 초기화를 위해 한번 호출
 	OnInvincibilityChanged.Broadcast(false); // UI 초기화를 위해 한번 호출
 
+	// 초기 무기 상태 UI 업데이트
+	NotifyWeaponChanged();
+
 	/* 마우스 설정 (기존 코드 유지) */
 	if (APlayerController* PC = Cast<APlayerController>(GetController()))
 	{
@@ -271,4 +274,25 @@ void APrototypeCharacter::SetFlameCylinderVisible(bool bVisible)
 void APrototypeCharacter::StartFire()
 {
 	UE_LOG(LogTemp, Log, TEXT("StartFire called - Implement actual firing logic here or in weapons."));
+}
+
+FString APrototypeCharacter::GetCurrentWeaponName() const
+{
+	if (InputManager) // InputManager가 유효한지 확인
+	{
+		// InputManager의 새로운 public getter 함수들을 사용
+		if (InputManager->IsElectricWeaponActive()) return TEXT("Electric Gun");
+		if (InputManager->IsWaterWeaponActive())   return TEXT("Water Gun");
+		if (InputManager->IsFlameWeaponActive())   return TEXT("Flame Thrower");
+	}
+	return TEXT("Shooter"); // 기본값 또는 InputManager가 없을 경우
+}
+
+
+// 무기 변경 시 호출될 내부 함수 (새로 추가)
+void APrototypeCharacter::NotifyWeaponChanged()
+{
+	CurrentWeaponDisplayName = GetCurrentWeaponName(); // 현재 무기 이름 업데이트
+	OnWeaponChanged.Broadcast(CurrentWeaponDisplayName); // 델리게이트 호출
+	UE_LOG(LogTemp, Warning, TEXT("APrototypeCharacter::NotifyWeaponChanged - Broadcasting OnWeaponChanged. NewWeapon: %s"), *CurrentWeaponDisplayName);
 }

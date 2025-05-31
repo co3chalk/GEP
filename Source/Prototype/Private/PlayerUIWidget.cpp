@@ -1,13 +1,11 @@
 // PlayerUIWidget.cpp
 #include "PlayerUIWidget.h"
 #include "Components/TextBlock.h"
-#include "PrototypeCharacter.h" // APrototypeCharacter의 정의를 위해 포함
+#include "PrototypeCharacter.h" // APrototypeCharacter 정의 포함
 
 void UPlayerUIWidget::NativeConstruct()
 {
     Super::NativeConstruct();
-    // 초기에는 HPDisplayText가 설정되지 않았을 수 있으므로,
-    // 실제 초기화는 InitializeForPlayer에서 수행합니다.
 }
 
 void UPlayerUIWidget::InitializeForPlayer(APrototypeCharacter* InPlayerCharacter)
@@ -16,34 +14,57 @@ void UPlayerUIWidget::InitializeForPlayer(APrototypeCharacter* InPlayerCharacter
 
     if (PlayerCharacterRef)
     {
-        // 플레이어 캐릭터의 OnHPChanged 델리게이트에 우리 함수를 바인딩합니다.
-        // 이 델리게이트는 APrototypeCharacter.h에 선언되어 있어야 합니다.
-        // (예: DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHPChangedDelegate, int32, CurrentHP, int32, MaxHP);)
-        // (UPROPERTY(BlueprintAssignable) FOnHPChangedDelegate OnHPChanged;)
-        PlayerCharacterRef->OnHPChanged.AddDynamic(this, &UPlayerUIWidget::HandleHealthChanged); //
+        // HP 델리게이트 바인딩
+        PlayerCharacterRef->OnHPChanged.AddDynamic(this, &UPlayerUIWidget::HandleHealthChanged);
+        HandleHealthChanged(PlayerCharacterRef->GetCurrentHP(), PlayerCharacterRef->GetMaxHP());
 
-        // 초기 HP로 UI를 한번 업데이트합니다.
-        HandleHealthChanged(PlayerCharacterRef->GetCurrentHP(), PlayerCharacterRef->GetMaxHP()); //
+        // 무기 변경 델리게이트 바인딩 (중요)
+        PlayerCharacterRef->OnWeaponChanged.AddDynamic(this, &UPlayerUIWidget::HandleWeaponChanged); //
+        // 초기 무기 이름으로 UI 업데이트
+        UpdateCurrentWeaponText(PlayerCharacterRef->GetCurrentWeaponName()); //
     }
     else
     {
         UE_LOG(LogTemp, Warning, TEXT("PlayerUIWidget: InitializeForPlayer received a null PlayerCharacter."));
-        if (HPDisplayText) // 플레이어가 없으면 기본 텍스트 설정
+        if (HPDisplayText)
         {
-            HPDisplayText->SetText(FText::FromString(TEXT("HP : N/A")));
+            HPDisplayText->SetText(FText::FromString(TEXT("HP: N/A")));
+        }
+        if (CurrentWeaponText)
+        {
+            CurrentWeaponText->SetText(FText::FromString(TEXT("Weapon: N/A")));
         }
     }
 }
 
 void UPlayerUIWidget::HandleHealthChanged(int32 CurrentHP, int32 MaxHP)
 {
-    if (HPDisplayText != nullptr) //
+    if (HPDisplayText != nullptr)
     {
-        FString HealthString = FString::Printf(TEXT("HP  :  %d / %d"), CurrentHP, MaxHP); //
-        HPDisplayText->SetText(FText::FromString(HealthString)); //
+        FString HealthString = FString::Printf(TEXT("HP: %d / %d"), CurrentHP, MaxHP);
+        HPDisplayText->SetText(FText::FromString(HealthString));
     }
-    else //
+    else
     {
-        UE_LOG(LogTemp, Warning, TEXT("PlayerUIWidget: HPDisplayText is not valid in HandleHealthChanged.")); //
+        UE_LOG(LogTemp, Error, TEXT("PlayerUIWidget: HPDisplayText is NULL in HandleHealthChanged."));
+    }
+}
+
+void UPlayerUIWidget::HandleWeaponChanged(const FString& NewWeaponName)
+{
+    UpdateCurrentWeaponText(NewWeaponName);
+}
+
+void UPlayerUIWidget::UpdateCurrentWeaponText(const FString& WeaponName)
+{
+    if (CurrentWeaponText != nullptr)
+    {
+        FString WeaponDisplayString = FString::Printf(TEXT("Weapon: %s"), *WeaponName);
+        CurrentWeaponText->SetText(FText::FromString(WeaponDisplayString));
+        UE_LOG(LogTemp, Log, TEXT("PlayerUIWidget: CurrentWeaponText updated to: %s"), *WeaponDisplayString);
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("PlayerUIWidget: CurrentWeaponText is NULL. Check BindWidget in Blueprint."));
     }
 }

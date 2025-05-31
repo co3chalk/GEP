@@ -1,3 +1,5 @@
+// PrototypeCharacter.h
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -18,6 +20,8 @@ class UInputManager;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHPChangedDelegate, int32, CurrentHP, int32, MaxHP);
 // 무적 상태 변경 시 호출될 델리게이트 선언
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInvincibilityChangedDelegate, bool, bIsNowInvincible);
+// 무기 변경 시 호출될 델리게이트 선언 (새로 추가 또는 이전 제안 유지)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponChangedDelegate, const FString&, NewWeaponName); //
 
 UCLASS()
 class PROTOTYPE_API APrototypeCharacter : public ACharacter
@@ -31,40 +35,49 @@ public:
 
 	/* --- 체력 (HP) 관련 --- */
 	UFUNCTION(BlueprintPure, Category = "Health")
-		int32 GetMaxHP() const;
+	int32 GetMaxHP() const;
 
 	UFUNCTION(BlueprintPure, Category = "Health")
-		int32 GetCurrentHP() const;
+	int32 GetCurrentHP() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
-		void TakeDamage(int32 DamageAmount = 1);
+	void TakeDamage(int32 DamageAmount = 1);
 
 	UFUNCTION(BlueprintPure, Category = "Health")
-		bool IsInvincible() const;
+	bool IsInvincible() const;
 
 	UPROPERTY(BlueprintAssignable, Category = "Health")
-		FOnHPChangedDelegate OnHPChanged;
+	FOnHPChangedDelegate OnHPChanged;
 
 	UPROPERTY(BlueprintAssignable, Category = "Health")
-		FOnInvincibilityChangedDelegate OnInvincibilityChanged;
+	FOnInvincibilityChangedDelegate OnInvincibilityChanged;
 
+	// 현재 무기 이름을 반환하는 함수 (새로 추가)
+	UFUNCTION(BlueprintPure, Category = "Weapon")
+	FString GetCurrentWeaponName() const;
+
+	// 이 델리게이트에 PlayerUIWidget이 바인딩합니다. (새로 추가)
+	UPROPERTY(BlueprintAssignable, Category = "Weapon")
+	FOnWeaponChangedDelegate OnWeaponChanged;
+
+	void NotifyWeaponChanged();
 
 protected:
 	virtual void BeginPlay() override;
 
 	/* --- 체력 (HP) 변수 --- */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
-		int32 MaxHP = 6; // 최대 HP 6
+	int32 MaxHP = 6; // 최대 HP 6
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
-		int32 CurrentHP; // 현재 HP
+	int32 CurrentHP; // 현재 HP
 
-		/* --- 무적 관련 변수 및 함수 --- */
+	/* --- 무적 관련 변수 및 함수 --- */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
-		bool bIsInvincible = false;
+	bool bIsInvincible = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Health")
-		float InvincibilityDuration = 5.0f;
+	float InvincibilityDuration = 5.0f;
 
 	FTimerHandle InvincibilityTimerHandle;
 
@@ -75,6 +88,9 @@ protected:
 	void HandleHPChange();
 	void Die();
 
+	// 현재 무기 이름을 저장할 변수 (새로 추가)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
+	FString CurrentWeaponDisplayName;
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -90,20 +106,20 @@ public:
 	bool bShouldRotateToMouse = false;
 	bool IsRotationLocked() const;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-		UInputManager* InputManager;
+	UInputManager* InputManager;
 	bool bWaitingForPostRotationAction = false;
 	FRotator RotationTarget;
 	TFunction<void()> PostRotationAction;
 
 	/* 에너지 관련 bool 변수 (기존 코드 유지) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy")
-		bool bGetEnergy = false;
+	bool bGetEnergy = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Flame_Energy")
-		bool bGetFlameEnergy = false;
+	bool bGetFlameEnergy = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Water_Energy")
-		bool bGetWaterEnergy = false;
+	bool bGetWaterEnergy = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Elctric_Energy")
-		bool bGetElectricEnergy = false;
+	bool bGetElectricEnergy = false;
 
 	void SetGetEnergy(bool bValue);
 	void SetGetFlameEnergy(bool bValue);
