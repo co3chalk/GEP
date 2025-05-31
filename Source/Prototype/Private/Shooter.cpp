@@ -10,6 +10,8 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Components/SkeletalMeshComponent.h" // 캐릭터의 GetMesh()가 반환하는 타입
+
 
 UShooter::UShooter()
 {
@@ -65,6 +67,51 @@ void UShooter::TickComponent(float DeltaTime, ELevelTick TickType,
 	UpdateGrabbedPhysics(DeltaTime);
 	UpdateGrabbedNonPhysics(DeltaTime);
 	UpdateMissedGrabVisual(DeltaTime);
+}
+
+FVector UShooter::GetActualLineTraceStartLocation() const
+{
+	// OwnerChar 자체는 UpdateLineTrace와 같은 호출부에서 유효성 검사를 하고 넘어온다고 가정합니다.
+	// 만약 여기서도 OwnerChar가 nullptr일 수 있다면, 가장 먼저 체크해야 합니다.
+	if (!OwnerChar)
+	{
+		// UE_LOG(LogTemp, Error, TEXT("GetActualLineTraceStartLocation called with null OwnerChar!"));
+		if (GetOwner()) // 컴포넌트의 직접적인 소유주 액터가 있다면 그 위치를 반환
+		{
+			return GetOwner()->GetActorLocation();
+		}
+		return FVector::ZeroVector; // 최후의 폴백
+	}
+
+	APrototypeCharacter* ProtoChar = Cast<APrototypeCharacter>(OwnerChar);
+
+	if (ProtoChar) // OwnerChar가 APrototypeCharacter로 성공적으로 캐스팅되었는지 확인
+	{
+		// CharacterMuzzleSocketName이 설정되어 있고, GetMesh()가 유효한지 확인
+		if (ProtoChar->GetMesh() && ProtoChar->CharacterMuzzleSocketName != NAME_None)
+		{
+			if (ProtoChar->GetMesh()->DoesSocketExist(ProtoChar->CharacterMuzzleSocketName))
+			{
+				return ProtoChar->GetMesh()->GetSocketLocation(ProtoChar->CharacterMuzzleSocketName); // 경로 1: 소켓 위치 반환
+			}
+			else
+			{
+				// 소켓 이름은 있지만 실제 소켓이 없는 경우
+				// UE_LOG(LogTemp, Warning, TEXT("UShooter: Socket '%s' not found on OwnerChar's mesh. Using character location + offset."), *ProtoChar->CharacterMuzzleSocketName.ToString());
+				return OwnerChar->GetActorLocation() + FVector(0, 0, 50.0f); // 경로 2: 폴백 1 (캐릭터 위치 + 오프셋)
+			}
+		}
+		else
+		{
+			// MuzzleSocketName이 설정되지 않았거나 GetMesh()가 유효하지 않은 경우
+			// UE_LOG(LogTemp, Warning, TEXT("UShooter: OwnerChar's mesh is null or CharacterMuzzleSocketName is None. Using character location + offset."));
+			return OwnerChar->GetActorLocation() + FVector(0, 0, 50.0f); // 경로 3: 폴백 2 (캐릭터 위치 + 오프셋)
+		}
+	}
+
+	// OwnerChar가 APrototypeCharacter 타입이 아닌 경우 (캐스팅 실패)
+	// UE_LOG(LogTemp, Warning, TEXT("UShooter: OwnerChar is not of type APrototypeCharacter. Using character location + offset."));
+	return OwnerChar->GetActorLocation() + FVector(0, 0, 50.0f); // 경로 4: 최종 폴백 (캐릭터 위치 + 오프셋)
 }
 
 /*--------------------- 입력 래퍼 (본문 이동) ---------------------*/
@@ -188,9 +235,9 @@ void UShooter::UpdateLineTrace()
 {
 	if (!OwnerChar) return;
 
-	LineStart = OwnerChar->GetActorLocation() + FVector(0, 0, 50.0f);
-	FVector ForwardVector = OwnerChar->GetActorForwardVector();
-	LineEnd = LineStart + ForwardVector * GrabMaxDistance;
+	LineStart = GetActualLineTraceStartLocation(); // 수정된 헬퍼 함수가 정확한 소켓 위치를 반환
+	FVector CharacterForwardDirection = OwnerChar->GetActorForwardVector(); // 캐릭터 정면 방향
+	LineEnd = LineStart + CharacterForwardDirection * GrabMaxDistance;
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(OwnerChar);

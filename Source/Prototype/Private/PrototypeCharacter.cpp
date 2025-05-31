@@ -23,6 +23,8 @@
 APrototypeCharacter::APrototypeCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	// 소켓 이름의 기본값을 설정합니다.
+	CharacterMuzzleSocketName = TEXT("Buster"); // 여기에 실제 소켓 이름을 입력하세요.
 
 	/* 캡슐 초기화 (기존 코드 유지) */
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.f);
