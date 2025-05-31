@@ -95,6 +95,9 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	FName CharacterMuzzleSocketName; // 변수 이름 변경 (예: BusterSocketName 또는 MuzzleSocketName)
+
 
 	/* 이동 & 점프 (기존 코드 유지) */
 	void MoveForward(float Value);

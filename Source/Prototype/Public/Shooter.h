@@ -43,7 +43,8 @@ private:
 	UPROPERTY() UPhysicsConstraintComponent* RotationConstraint;
 	UPROPERTY() UStaticMeshComponent* GrabVisualMesh;
 	UPROPERTY() UPrimitiveComponent* GrabbedComponent = nullptr;
-
+	
+	FVector GetActualLineTraceStartLocation() const;
 	// 카메라는 Owner(PrototypeCharacter)에서 참조
 	class APrototypeCharacter* OwnerChar = nullptr;
 	class UCameraComponent* FollowCamera = nullptr;
