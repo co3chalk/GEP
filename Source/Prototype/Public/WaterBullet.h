@@ -41,6 +41,12 @@ public:
 		UPrimitiveComponent* OtherComp, FVector NormalImpulse,
 		const FHitResult& Hit);
 
+	UFUNCTION()
+	void OnOverlapEnemy(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult);
+
+
 	FTimerHandle DestroyTimerHandle;
 	bool bIsDestroyTimerSet = false;
 	void DestroyBullet();

@@ -5,6 +5,8 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SphereComponent.h"
+#include "EnemyActor.h"
+
 // Sets default values
 AWaterBullet::AWaterBullet()
 {
@@ -22,6 +24,7 @@ AWaterBullet::AWaterBullet()
     CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel10, ECR_Ignore); // 다른 물총알 무시
     CollisionComp->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
     CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel11, ECR_Overlap); // 스펀지랑만 겹침
+    CollisionComp->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECR_Overlap); // 적 겹침
 
     MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
     MeshComp->SetupAttachment(CollisionComp);
@@ -45,6 +48,8 @@ void AWaterBullet::BeginPlay()
     SetLifeSpan(LifeSpan); // 이 시점에 LifeSpan 값을 반영
 
     CollisionComp->OnComponentHit.AddDynamic(this, &AWaterBullet::OnHit);
+    CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AWaterBullet::OnOverlapEnemy);
+
 }
 
 // Called every frame
@@ -83,4 +88,23 @@ void AWaterBullet::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor,
     const FHitResult& Hit)
 {
     UE_LOG(LogTemp, Warning, TEXT("물총알이 %s에 충돌했습니다."), *OtherActor->GetName());
+}
+
+void AWaterBullet::OnOverlapEnemy(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+    bool bFromSweep, const FHitResult& SweepResult)
+{
+    UE_LOG(LogTemp, Warning, TEXT("물총알이 %s와 겹침 발생"), *OtherActor->GetName());
+
+    if (OtherActor && OtherActor != this)
+    {
+        AEnemyActor* Enemy = Cast<AEnemyActor>(OtherActor);
+        if (Enemy)
+        {
+            Enemy->Slowdown(1.f); // 1초 동안 느려짐
+            Destroy();
+        }
+    }
+
+   
 }

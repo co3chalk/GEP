@@ -16,6 +16,7 @@ AEnemyActor::AEnemyActor()
     Mesh->SetCollisionObjectType(ECC_GameTraceChannel2); // Enemy
     Mesh->SetCollisionResponseToAllChannels(ECR_Ignore);
     Mesh->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Overlap); // Bullet
+    Mesh->SetCollisionResponseToChannel(ECC_GameTraceChannel10, ECR_Overlap); // WaterBullet
 
     static ConstructorHelpers::FObjectFinder<UStaticMesh> SM(TEXT("/Engine/BasicShapes/Cube"));
     if (SM.Succeeded())
@@ -47,10 +48,10 @@ void AEnemyActor::Tick(float DeltaTime)
 
     if (bIsFrozen) return;
 
-    const float Speed = 150.f;
+    //const float Speed = 150.f;
     const FVector Target = bGoingToB ? PatrolPointB : PatrolPointA;
     FVector Dir = (Target - GetActorLocation()).GetSafeNormal();
-    SetActorLocation(GetActorLocation() + Dir * Speed * DeltaTime);
+    SetActorLocation(GetActorLocation() + Dir * CurrentSpeed * DeltaTime);  //Speed->CurrentSpeed
 
     if (FVector::DistSquared(GetActorLocation(), Target) < 25.f * 25.f)
         bGoingToB = !bGoingToB;
@@ -96,3 +97,19 @@ void AEnemyActor::Unfreeze()
     }
 }
 
+void AEnemyActor::Slowdown(float Seconds)
+{
+    CurrentSpeed = 100.f; // 느려진 속도
+    GetWorld()->GetTimerManager().SetTimer(
+        SlowdownTimerHandle,
+        this,
+        &AEnemyActor::RestoreSpeed,
+        Seconds,
+        false
+    );
+}
+
+void AEnemyActor::RestoreSpeed()
+{
+    CurrentSpeed = Speed;
+}

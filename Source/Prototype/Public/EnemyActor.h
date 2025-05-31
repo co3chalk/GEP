@@ -16,6 +16,7 @@ public:
     AEnemyActor();
     virtual void Tick(float DeltaTime) override;
     void Freeze(float Seconds);
+    void Slowdown(float Seconds);
 
 protected:
     virtual void BeginPlay() override;
@@ -43,7 +44,15 @@ private:
     UPROPERTY(VisibleAnywhere, Category = "Effect")
     UNiagaraComponent* ElectroShockEffect;
 
+    UPROPERTY(EditAnywhere) //원하시는 속도로 조절하시길..
+    float Speed = 150.0f;
+
+    UPROPERTY(VisibleAnywhere, Category = "Current Speed")
+    float CurrentSpeed = 150.0f;
 
     void Unfreeze();
     void ApplyElectroShockEffect();
+
+    FTimerHandle SlowdownTimerHandle;
+    void RestoreSpeed();
 };
