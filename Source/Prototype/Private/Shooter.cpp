@@ -281,18 +281,25 @@ void UShooter::UpdateGrabbedPhysics(float DeltaTime)
 		FVector End = TargetLocation;
 		FVector RopeDir = End - Start;
 		float Length = RopeDir.Size();
+		if (Length < KINDA_SMALL_NUMBER)
+		{
+			GrabVisualMesh->SetVisibility(false);
+			return;
+		}
 		FVector Mid = (Start + End) * 0.5f;
 
-		FVector CameraDir = FollowCamera->GetForwardVector();
+		/*FVector CameraDir = FollowCamera->GetForwardVector();
 		float AngleDeg = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(
 			CameraDir, RopeDir.GetSafeNormal())));
-		float Thickness = (AngleDeg < 15.0f) ? 3.0f : 0.2f;
+		float Thickness = (AngleDeg < 15.0f) ? 3.0f : 0.2f;*/
+		float ConstantMyThickness = 0.2f; // <--- 원하는 고정 두께 값으로 설정
+
 		float ScaleZ = Length / 100.0f;
 
 		GrabVisualMesh->SetVisibility(true);
 		GrabVisualMesh->SetWorldLocation(Mid);
 		GrabVisualMesh->SetWorldRotation(FRotationMatrix::MakeFromZ(RopeDir).Rotator());
-		GrabVisualMesh->SetWorldScale3D(FVector(Thickness, Thickness, ScaleZ));
+		GrabVisualMesh->SetWorldScale3D(FVector(ConstantMyThickness, ConstantMyThickness, ScaleZ));
 	}
 }
 void UShooter::UpdateGrabbedNonPhysics(float DeltaTime)
