@@ -95,8 +95,18 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	// 라인 트레이서 시작점용 소켓 이름을 저장할 변수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (DisplayName = "Physics Trace Start Socket Name"))
+	FName CharacterMuzzleSocketName;
+
+	// 실린더 비주얼 시작점용 "버스터 메시" 컴포넌트 참조
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
+	USceneComponent* AttachedBusterMeshComponent;
+
+	// 위 AttachedBusterMeshComponent 위의 "Nozzle" 소켓 이름
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	FName CharacterMuzzleSocketName; // 변수 이름 변경 (예: BusterSocketName 또는 MuzzleSocketName)
+	FName NozzleSocketNameOnBusterMesh;
 
 
 	/* 이동 & 점프 (기존 코드 유지) */

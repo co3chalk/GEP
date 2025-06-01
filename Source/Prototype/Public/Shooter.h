@@ -86,6 +86,8 @@ private:
 	int32 SafeLocationMaxFrames = 10;
 
 	/* ---------------- 내부 메서드 (본문은 .cpp에 원본 그대로) ---------------- */
+	FVector GetVisualCylinderStartLocation() const;
+
 	void RotateCharacterToMouse();
 	void UpdateLineTrace();
 	void UpdateGrabbedPhysics(float DeltaTime);

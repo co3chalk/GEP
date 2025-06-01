@@ -69,51 +69,49 @@ void UShooter::TickComponent(float DeltaTime, ELevelTick TickType,
 	UpdateMissedGrabVisual(DeltaTime);
 }
 
+// Shooter.cpp
 FVector UShooter::GetActualLineTraceStartLocation() const
 {
-	// OwnerChar 자체는 UpdateLineTrace와 같은 호출부에서 유효성 검사를 하고 넘어온다고 가정합니다.
-	// 만약 여기서도 OwnerChar가 nullptr일 수 있다면, 가장 먼저 체크해야 합니다.
-	if (!OwnerChar)
-	{
-		// UE_LOG(LogTemp, Error, TEXT("GetActualLineTraceStartLocation called with null OwnerChar!"));
-		if (GetOwner()) // 컴포넌트의 직접적인 소유주 액터가 있다면 그 위치를 반환
-		{
-			return GetOwner()->GetActorLocation();
-		}
-		return FVector::ZeroVector; // 최후의 폴백
-	}
-
+	if (!OwnerChar) { /*...*/ return FVector::ZeroVector; }
 	APrototypeCharacter* ProtoChar = Cast<APrototypeCharacter>(OwnerChar);
-
-	if (ProtoChar) // OwnerChar가 APrototypeCharacter로 성공적으로 캐스팅되었는지 확인
+	if (ProtoChar)
 	{
-		// CharacterMuzzleSocketName이 설정되어 있고, GetMesh()가 유효한지 확인
-		if (ProtoChar->GetMesh() && ProtoChar->CharacterMuzzleSocketName != NAME_None)
+		if (ProtoChar->GetMesh() && ProtoChar->CharacterMuzzleSocketName != NAME_None) // CharacterMainSocketName 사용
 		{
 			if (ProtoChar->GetMesh()->DoesSocketExist(ProtoChar->CharacterMuzzleSocketName))
 			{
-				return ProtoChar->GetMesh()->GetSocketLocation(ProtoChar->CharacterMuzzleSocketName); // 경로 1: 소켓 위치 반환
+				return ProtoChar->GetMesh()->GetSocketLocation(ProtoChar->CharacterMuzzleSocketName); // 캐릭터 주 메쉬의 "Buster" 소켓
 			}
-			else
-			{
-				// 소켓 이름은 있지만 실제 소켓이 없는 경우
-				// UE_LOG(LogTemp, Warning, TEXT("UShooter: Socket '%s' not found on OwnerChar's mesh. Using character location + offset."), *ProtoChar->CharacterMuzzleSocketName.ToString());
-				return OwnerChar->GetActorLocation() + FVector(0, 0, 50.0f); // 경로 2: 폴백 1 (캐릭터 위치 + 오프셋)
-			}
+			// UE_LOG(LogTemp, Warning, TEXT("Socket '%s' not found on OwnerChar's mesh."), *ProtoChar->CharacterMainSocketName.ToString());
+			return OwnerChar->GetActorLocation() + FVector(0, 0, 50.0f);
 		}
-		else
-		{
-			// MuzzleSocketName이 설정되지 않았거나 GetMesh()가 유효하지 않은 경우
-			// UE_LOG(LogTemp, Warning, TEXT("UShooter: OwnerChar's mesh is null or CharacterMuzzleSocketName is None. Using character location + offset."));
-			return OwnerChar->GetActorLocation() + FVector(0, 0, 50.0f); // 경로 3: 폴백 2 (캐릭터 위치 + 오프셋)
-		}
+		// UE_LOG(LogTemp, Warning, TEXT("OwnerChar's mesh or CharacterMainSocketName is invalid."));
+		return OwnerChar->GetActorLocation() + FVector(0, 0, 50.0f);
 	}
-
-	// OwnerChar가 APrototypeCharacter 타입이 아닌 경우 (캐스팅 실패)
-	// UE_LOG(LogTemp, Warning, TEXT("UShooter: OwnerChar is not of type APrototypeCharacter. Using character location + offset."));
-	return OwnerChar->GetActorLocation() + FVector(0, 0, 50.0f); // 경로 4: 최종 폴백 (캐릭터 위치 + 오프셋)
+	return OwnerChar ? OwnerChar->GetActorLocation() + FVector(0, 0, 50.0f) : FVector::ZeroVector;
 }
+// Shooter.cpp
+FVector UShooter::GetVisualCylinderStartLocation() const
+{
+	if (!OwnerChar) { return FVector::ZeroVector; }
+	APrototypeCharacter* ProtoChar = Cast<APrototypeCharacter>(OwnerChar);
 
+	// AttachedBusterMeshComponent (예: SM_Rachel_Buster)와 NozzleSocketNameOnBusterMesh 사용
+	if (ProtoChar && ProtoChar->AttachedBusterMeshComponent)
+	{
+		UMeshComponent* ActualBusterMesh = Cast<UMeshComponent>(ProtoChar->AttachedBusterMeshComponent);
+		if (ActualBusterMesh && ProtoChar->NozzleSocketNameOnBusterMesh != NAME_None && ActualBusterMesh->DoesSocketExist(ProtoChar->NozzleSocketNameOnBusterMesh))
+		{
+			return ActualBusterMesh->GetSocketLocation(ProtoChar->NozzleSocketNameOnBusterMesh); // "Buster 메시"의 "Nozzle" 소켓
+		}
+		// 소켓 못 찾으면 "Buster 메시"의 원점이라도 반환
+		if (ActualBusterMesh) return ActualBusterMesh->GetComponentLocation();
+		// UE_LOG(LogTemp, Warning, TEXT("Nozzle socket not found or invalid mesh for AttachedBusterMeshComponent. Using its origin or fallback."));
+	}
+	// 최종 폴백: 라인 트레이스 시작점과 동일하게 처리 (또는 다른 적절한 위치)
+	// UE_LOG(LogTemp, Warning, TEXT("AttachedBusterMeshComponent not set. Visual cylinder falling back to LineTraceStart."));
+	return GetActualLineTraceStartLocation();
+}
 /*--------------------- 입력 래퍼 (본문 이동) ---------------------*/
 void UShooter::Grab() {
 	if (bIsLineTraceHit)
@@ -265,7 +263,7 @@ void UShooter::UpdateGrabbedPhysics(float DeltaTime)
 
 	if (GrabVisualMesh)
 	{
-		FVector Start = OwnerChar->GetActorLocation();
+		FVector Start = GetVisualCylinderStartLocation(); // <--- 여기를 수정! (Nozzle 소켓 위치)
 		FVector End = TargetLocation;
 		FVector RopeDir = End - Start;
 		float Length = RopeDir.Size();
@@ -317,18 +315,31 @@ void UShooter::UpdateGrabbedNonPhysics(float DeltaTime)
 
 	if (GrabVisualMesh)
 	{
-		FVector CameraDir = FollowCamera->GetForwardVector();
-		float AngleDeg = FMath::RadiansToDegrees(FMath::Acos(
-			FVector::DotProduct(CameraDir, RopeVector.GetSafeNormal())));
-		float Thickness = (AngleDeg < 15.0f) ? 3.0f : 0.2f;
-		float ScaleZ = RopeVector.Size() / 100.0f;
-		FVector Mid = (OwnerChar->GetActorLocation() + NonPhysicsHitLocation) * 0.5f;
+		FVector Start = GetVisualCylinderStartLocation(); // <--- 여기를 수정! (Nozzle 소켓 위치)
+		FVector End = NonPhysicsHitLocation;                  // 실린더 끝점은 고정된 히트 지점
+		// (또는 캐릭터 위치로 하려면: OwnerChar->GetActorLocation())
 
-		float ConstantThickness = 0.5f;
-		GrabVisualMesh->SetVisibility(true);
-		GrabVisualMesh->SetWorldLocation(Mid);
-		GrabVisualMesh->SetWorldRotation(FRotationMatrix::MakeFromZ(RopeVector).Rotator());
-		GrabVisualMesh->SetWorldScale3D(FVector(ConstantThickness, ConstantThickness, ScaleZ));
+		FVector VisualRopeDir = End - Start; // 비주얼을 위한 방향 벡터
+		float Length = VisualRopeDir.Size();
+		if (Length < KINDA_SMALL_NUMBER)
+		{
+			GrabVisualMesh->SetVisibility(false);
+		}
+		else
+		{
+			FVector Mid = (Start + End) * 0.5f;
+			FVector CameraDir = FollowCamera ? FollowCamera->GetForwardVector() : OwnerChar->GetActorForwardVector();
+			float AngleDeg = FMath::RadiansToDegrees(FMath::Acos(
+				FVector::DotProduct(CameraDir, VisualRopeDir.GetSafeNormal())));
+			// float Thickness = (AngleDeg < 15.0f) ? 3.0f : 0.2f; // 기존 두께 로직
+			float ConstantThickness = 0.5f; // 코드에 있던 고정 두께 사용
+			float ScaleZ = Length / 100.0f;
+
+			GrabVisualMesh->SetVisibility(true);
+			GrabVisualMesh->SetWorldLocation(Mid);
+			GrabVisualMesh->SetWorldRotation(FRotationMatrix::MakeFromZ(VisualRopeDir).Rotator());
+			GrabVisualMesh->SetWorldScale3D(FVector(ConstantThickness, ConstantThickness, ScaleZ));
+		}
 	}
 
 	if (bIsRightMouseButtonDown)
@@ -375,7 +386,7 @@ void UShooter::UpdateMissedGrabVisual(float DeltaTime)
 	}
 	else
 	{
-		FVector Start = OwnerChar->GetActorLocation();
+		FVector Start = GetVisualCylinderStartLocation(); // <--- 여기를 수정! (Nozzle 소켓 위치)
 		FVector End = MissedGrabTarget;
 		FVector RopeDir = End - Start;
 		float Length = RopeDir.Size();
@@ -398,7 +409,7 @@ void UShooter::UpdateGrabVisualMesh()
 {
 	if (!GrabVisualMesh || !GrabbedComponent || !OwnerChar) return;
 
-	FVector Start = OwnerChar->GetActorLocation();
+	FVector Start = GetVisualCylinderStartLocation(); // <--- 여기를 수정! (Nozzle 소켓 위치)
 	FVector End = Start + OwnerChar->GetActorForwardVector() * GrabbedObjectDistance;
 	FVector RopeDir = End - Start;
 	float Length = RopeDir.Size();
