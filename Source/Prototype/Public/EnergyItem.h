@@ -24,7 +24,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere)
-	class UBoxComponent* boxComp;
+	class USphereComponent* sphereComp;
 
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* meshComp;
