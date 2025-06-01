@@ -2,7 +2,7 @@
 
 
 #include "EnergyItem.h"
-#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "PrototypeCharacter.h"
 // Sets default values
@@ -11,17 +11,17 @@ AEnergyItem::AEnergyItem()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-    boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("boxComp"));
-    SetRootComponent(boxComp);
+    sphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("sphereComp"));
+    SetRootComponent(RootComponent);
  
-    boxComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-    boxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
-    boxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+    sphereComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    sphereComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+    sphereComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
     meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
-    meshComp->SetupAttachment(boxComp);
+    meshComp->SetupAttachment(sphereComp);
 
-    boxComp->OnComponentBeginOverlap.AddDynamic(this, &AEnergyItem::OnOverlapBegin);
+    sphereComp->OnComponentBeginOverlap.AddDynamic(this, &AEnergyItem::OnOverlapBegin);
 }
 
 // Called when the game starts or when spawned
@@ -44,19 +44,21 @@ void AEnergyItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
 {
     if (APrototypeCharacter* Player = Cast<APrototypeCharacter>(OtherActor))
     {
-        Player->SetGetEnergy(true); // 에너지 획득 처리
-
         //각 원소마다 획득 카운트 추가, 에너지 획득 되고 각 원소에 맞게 1개 이상 존재하면 발사 가능하게 변경
         switch (id) {
         case 0:
+            Player->SetGetBasicEnergy(true);
+            //얻은 에너지 갯수 증가
+            break;
+        case 1:
             Player->SetGetFlameEnergy(true);
             //얻은 불에너지 갯수 증가
             break;
-        case 1:
+        case 2:
             Player->SetGetWaterEnergy(true);
             //
             break;
-        case 2:
+        case 3:
             Player->SetGetElectricEnergy(true);
             //
             break;

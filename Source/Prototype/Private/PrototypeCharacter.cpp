@@ -270,10 +270,10 @@ void APrototypeCharacter::EndInvincibility()
 
 /* --- 기타 함수 구현 (기존 코드 유지) --- */
 bool APrototypeCharacter::IsRotationLocked() const { return Shooter && Shooter->ShouldLockRotation(); }
-void APrototypeCharacter::SetGetEnergy(bool bValue) { bGetEnergy = bValue; }
-void APrototypeCharacter::SetGetFlameEnergy(bool bValue) { bGetFlameEnergy = bValue; }
-void APrototypeCharacter::SetGetWaterEnergy(bool bValue) { bGetWaterEnergy = bValue; }
-void APrototypeCharacter::SetGetElectricEnergy(bool bValue) { bGetElectricEnergy = bValue; }
+void APrototypeCharacter::SetGetBasicEnergy(bool bValue) { basicEnergy++; }
+void APrototypeCharacter::SetGetFlameEnergy(bool bValue) { flameEnergy++; }
+void APrototypeCharacter::SetGetWaterEnergy(bool bValue) { waterEnergy++; }
+void APrototypeCharacter::SetGetElectricEnergy(bool bValue) { electricEnergy++; }
 
 void APrototypeCharacter::SetFlameVisible(bool bVisible)
 {

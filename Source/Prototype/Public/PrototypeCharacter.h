@@ -124,17 +124,17 @@ public:
 	FRotator RotationTarget;
 	TFunction<void()> PostRotationAction;
 
-	/* 에너지 관련 bool 변수 (기존 코드 유지) */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy")
-	bool bGetEnergy = false;
+	/* 에너지 관련 int 변수 (기존 코드 유지) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Basic_Energy")
+	int basicEnergy = 0;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Flame_Energy")
-	bool bGetFlameEnergy = false;
+	int flameEnergy = 0;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Water_Energy")
-	bool bGetWaterEnergy = false;
+	int waterEnergy = 0;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Elctric_Energy")
-	bool bGetElectricEnergy = false;
+	int electricEnergy = 0;
 
-	void SetGetEnergy(bool bValue);
+	void SetGetBasicEnergy(bool bValue);
 	void SetGetFlameEnergy(bool bValue);
 	void SetGetWaterEnergy(bool bValue);
 	void SetGetElectricEnergy(bool bValue);
