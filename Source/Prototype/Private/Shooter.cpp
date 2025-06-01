@@ -416,7 +416,7 @@ void UShooter::UpdateMissedGrabVisual(float DeltaTime)
 		FVector CameraDir = FollowCamera->GetForwardVector();
 		float AngleDeg = FMath::RadiansToDegrees(FMath::Acos(
 			FVector::DotProduct(CameraDir, RopeDir.GetSafeNormal())));
-		float Thickness = (AngleDeg < 15.0f) ? 3.0f : 0.2f;
+		float Thickness = 0.1f;
 
 		float ScaleZ = Length / 100.0f;
 
