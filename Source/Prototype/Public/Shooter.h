@@ -30,6 +30,10 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	bool ShouldLockRotation() const { return GrabbedComponent || bIsGrabbingNonPhysics; }
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grab|Physics", meta = (DisplayName = "Max Grab Stretch Tolerance"))
+	float MaxGrabStretchTolerance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grab|Physics", meta = (DisplayName = "Grab Distance Adapt Threshold"))
+	float GrabDistanceAdaptThreshold; // 이 값보다 더 가까워져야 GrabbedObjectDistance가 줄어듦
 
 protected:
 	virtual void BeginPlay() override;
@@ -43,6 +47,7 @@ private:
 	UPROPERTY() UPhysicsConstraintComponent* RotationConstraint;
 	UPROPERTY() UStaticMeshComponent* GrabVisualMesh;
 	UPROPERTY() UPrimitiveComponent* GrabbedComponent = nullptr;
+	
 	// 비물리 오브젝트 잡았을 때 캐릭터 회전 속도
 	UPROPERTY(EditAnywhere, Category = "Grab|NonPhysics", meta = (DisplayName = "Non-Physics Grab Rotation Speed"))
 	float NonPhysicsGrabRotationInterpSpeed;
