@@ -16,6 +16,7 @@
 UShooter::UShooter()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	NonPhysicsGrabRotationInterpSpeed = 360.0f; // 초당 360도 (값 조절 가능)
 
 	GrabVisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GrabVisualMesh"));
 	GrabVisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -171,6 +172,10 @@ void UShooter::Grab() {
 			NonPhysicsHitLocation = CachedHitResult.ImpactPoint;
 			NonPhysicsGrabDistance = FVector::Dist(OwnerChar->GetActorLocation(), NonPhysicsHitLocation);
 			bIsGrabbingNonPhysics = true;
+			if (OwnerChar && OwnerChar->GetCharacterMovement())
+			{
+				OwnerChar->GetCharacterMovement()->bOrientRotationToMovement = false; // <--- 추가: 이동 방향으로 자동 회전 끄기
+			}
 		}
 	}
 	if (!bIsLineTraceHit || !CachedHitResult.GetComponent())
@@ -210,10 +215,21 @@ void UShooter::Release() {
 	{
 		GrabVisualMesh->SetVisibility(false);
 	}
+	bool bWasGrabbing = GrabbedComponent || bIsGrabbingNonPhysics; // 잡고 있었는지 여부
 
 	GrabbedComponent = nullptr;
 	bIsGrabbingNonPhysics = false;
-	bNonPhysicsCollisionOccurred = false; // 충돌 리셋
+	bShowMissedGrabVisual = false;
+	bNonPhysicsCollisionOccurred = false;
+
+	if (OwnerChar && OwnerChar->GetCharacterMovement())
+	{
+		OwnerChar->GetCharacterMovement()->GravityScale = 1.0f;
+		if (bWasGrabbing) // 잡고 있었던 상태를 해제할 때만 회전 복원
+		{
+			OwnerChar->GetCharacterMovement()->bOrientRotationToMovement = true; // <--- 추가: 이동 방향으로 자동 회전 다시 켜기
+		}
+	}
 
 }
 
@@ -389,7 +405,54 @@ void UShooter::UpdateGrabbedNonPhysics(float DeltaTime)
 		FVector CorrectedLocation = NonPhysicsHitLocation + OffsetFromCenter;
 		OwnerChar->SetActorLocation(CorrectedLocation, false);
 	}
+	// 캐릭터가 NonPhysicsHitLocation을 바라보도록 회전시키는 로직
+	if (OwnerChar->GetCharacterMovement() && !OwnerChar->GetCharacterMovement()->bOrientRotationToMovement) // 자동 회전이 꺼져 있을 때만
+	{
+		FVector TargetLookAtLocation = NonPhysicsHitLocation;
+		FVector CharacterLocation = OwnerChar->GetActorLocation();
 
+		FVector DirectionToTarget = TargetLookAtLocation - CharacterLocation;
+		DirectionToTarget.Z = 0.0f; // 수평 회전만 고려 (캐릭터가 위아래로 기울어지지 않도록)
+
+		if (!DirectionToTarget.IsNearlyZero(0.01f)) // 매우 가까우면 회전하지 않음
+		{
+			FRotator CurrentRotation = OwnerChar->GetActorRotation();
+			FRotator TargetRotation = DirectionToTarget.Rotation();
+
+			// 부드러운 회전을 위해 RInterpTo 사용
+			FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, NonPhysicsGrabRotationInterpSpeed);
+			OwnerChar->SetActorRotation(NewRotation);
+		}
+	}
+
+	// GrabVisualMesh 업데이트 로직 (이전과 동일하게 시작점만 GetVisualCylinderStartLocation() 사용)
+	if (GrabVisualMesh)
+	{
+		FVector Start = GetVisualCylinderStartLocation();
+		FVector End = NonPhysicsHitLocation;
+
+		FVector VisualRopeDir = End - Start;
+		float Length = VisualRopeDir.Size();
+		// ... (이하 GrabVisualMesh 설정 로직은 이전 답변과 동일하게 유지) ...
+		if (Length < KINDA_SMALL_NUMBER)
+		{
+			GrabVisualMesh->SetVisibility(false);
+		}
+		else
+		{
+			FVector Mid = (Start + End) * 0.5f;
+			FVector CameraDir = FollowCamera ? FollowCamera->GetForwardVector() : OwnerChar->GetActorForwardVector();
+			float AngleDeg = FMath::RadiansToDegrees(FMath::Acos(
+				FVector::DotProduct(CameraDir, VisualRopeDir.GetSafeNormal())));
+			float ConstantThickness = 0.1f; // 두께 값 (이전 코드에서 0.1f 사용)
+			float ScaleZ = Length / 100.0f;
+
+			GrabVisualMesh->SetVisibility(true);
+			GrabVisualMesh->SetWorldLocation(Mid);
+			GrabVisualMesh->SetWorldRotation(FRotationMatrix::MakeFromZ(VisualRopeDir).Rotator());
+			GrabVisualMesh->SetWorldScale3D(FVector(ConstantThickness, ConstantThickness, ScaleZ));
+		}
+	}
 	DrawDebugLine(GetWorld(), OwnerChar->GetActorLocation(), NonPhysicsHitLocation, FColor::Purple, false, 0.0f, 0, 2.0f);
 	DrawDebugSphere(GetWorld(), NonPhysicsHitLocation, 15.0f, 12, FColor::Yellow, false, 0.0f, 0, 2.0f);
 	DrawDebugSphere(GetWorld(), NonPhysicsHitLocation, MaxAllowedDistance, 32, FColor::Green, false, 0.0f, 0, 0.5f);

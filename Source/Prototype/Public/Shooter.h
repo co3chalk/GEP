@@ -43,7 +43,9 @@ private:
 	UPROPERTY() UPhysicsConstraintComponent* RotationConstraint;
 	UPROPERTY() UStaticMeshComponent* GrabVisualMesh;
 	UPROPERTY() UPrimitiveComponent* GrabbedComponent = nullptr;
-	
+	// 비물리 오브젝트 잡았을 때 캐릭터 회전 속도
+	UPROPERTY(EditAnywhere, Category = "Grab|NonPhysics", meta = (DisplayName = "Non-Physics Grab Rotation Speed"))
+	float NonPhysicsGrabRotationInterpSpeed;
 	FVector GetActualLineTraceStartLocation() const;
 	// 카메라는 Owner(PrototypeCharacter)에서 참조
 	class APrototypeCharacter* OwnerChar = nullptr;
