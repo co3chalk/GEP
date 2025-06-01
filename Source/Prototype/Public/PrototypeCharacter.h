@@ -130,7 +130,7 @@ public:
 	void SetGetElectricEnergy(bool bValue);
 
 	/* --- 불기둥 제어함수 (기존 코드 유지) --- */
-	void SetFlameCylinderVisible(bool bVisible);
+	void SetFlameVisible(bool bVisible);
 
 
 private:
@@ -140,7 +140,8 @@ private:
 	UPROPERTY(VisibleAnywhere) UCameraComponent* FollowCamera;
 
 	/* --- 화염방사 실린더 및 콜라이더 (기존 코드 유지) --- */
-	UPROPERTY(VisibleAnywhere) class UStaticMeshComponent* FlameCylinderMesh;
+	UPROPERTY(VisibleAnywhere) class UStaticMeshComponent* FlameCylinderMesh;	//원래 있던 메시
+	UPROPERTY(VisibleAnywhere) class UParticleSystemComponent* FlameParticle;
 	UPROPERTY(VisibleAnywhere, Category = "Flame")
 	UCapsuleComponent* FlameCollider;
 	bool bFlameCylinderVisible = false;

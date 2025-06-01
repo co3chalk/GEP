@@ -17,6 +17,8 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/World.h" 
 #include "TimerManager.h"
+#include "Particles/ParticleSystemComponent.h"
+
 
 
 /* ---------- 생성자 ---------- */
@@ -53,11 +55,18 @@ APrototypeCharacter::APrototypeCharacter()
 	InputManager = CreateDefaultSubobject<UInputManager>(TEXT("InputManager"));
 
 	/* 화염방사 메시/콜라이더 (기존 코드 유지) */
-	FlameCylinderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FlameCylinderMesh"));
-	FlameCylinderMesh->SetupAttachment(RootComponent);
-	FlameCylinderMesh->SetHiddenInGame(true);
+	//여기서부터
+	//FlameCylinderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FlameCylinderMesh"));
+	//FlameCylinderMesh->SetupAttachment(RootComponent);
+	//FlameCylinderMesh->SetHiddenInGame(true);
+	//여기까지 캡슐
+	FlameParticle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("FlameParticle"));
+	FlameParticle->SetupAttachment(RootComponent);
+	FlameParticle->SetAutoActivate(false);  // 초기엔 비활성화
+	FlameParticle->bAutoActivate = false;
+	FlameParticle->SetVisibility(false);    // 시각적으로도 숨김
 	FlameCollider = CreateDefaultSubobject<UCapsuleComponent>(TEXT("FlameCollider"));
-	FlameCollider->SetupAttachment(FlameCylinderMesh);
+	FlameCollider->SetupAttachment(FlameParticle);
 	FlameCollider->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 초기엔 비활성
 	FlameCollider->SetCollisionResponseToAllChannels(ECR_Ignore);
 	FlameCollider->SetCollisionResponseToChannel(ECC_PhysicsBody, ECR_Overlap);
@@ -95,8 +104,11 @@ void APrototypeCharacter::BeginPlay()
 	}
 
 	/* 화염방사 비활성화 (기존 코드 유지) */
-	if (FlameCylinderMesh)
-		FlameCylinderMesh->SetHiddenInGame(true);
+	if (FlameParticle)
+	{
+		FlameParticle->SetVisibility(false);       // 렌더링 숨김
+		FlameParticle->DeactivateSystem();         // 파티클 비활성화
+	}
 }
 
 /* ---------- Tick ---------- */
@@ -263,11 +275,20 @@ void APrototypeCharacter::SetGetFlameEnergy(bool bValue) { bGetFlameEnergy = bVa
 void APrototypeCharacter::SetGetWaterEnergy(bool bValue) { bGetWaterEnergy = bValue; }
 void APrototypeCharacter::SetGetElectricEnergy(bool bValue) { bGetElectricEnergy = bValue; }
 
-void APrototypeCharacter::SetFlameCylinderVisible(bool bVisible)
+void APrototypeCharacter::SetFlameVisible(bool bVisible)
 {
-	if (!FlameCylinderMesh || !FlameCollider) return;
+	if (!FlameParticle || !FlameCollider) return;
 
-	FlameCylinderMesh->SetHiddenInGame(!bVisible);
+	if (bVisible)
+	{
+		FlameParticle->SetVisibility(true);
+		FlameParticle->ActivateSystem(true);  // 루프 파티클 시작
+	}
+	else
+	{
+		FlameParticle->SetVisibility(false);
+		FlameParticle->DeactivateSystem(); // 루프 파티클 중지
+	}
 
 	FlameCollider->SetCollisionEnabled(bVisible ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 }

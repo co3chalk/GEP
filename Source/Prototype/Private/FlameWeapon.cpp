@@ -46,7 +46,7 @@ void UFlameWeapon::StartFire()
 	if (OwnerChar)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("StartFire: Showing flame cylinder"));
-		OwnerChar->SetFlameCylinderVisible(true);
+		OwnerChar->SetFlameVisible(true);
 
 
 		/* 포기포기포기
@@ -69,7 +69,7 @@ void UFlameWeapon::StopFire()
 	if (OwnerChar)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("StopFire: Hiding flame cylinder"));
-		OwnerChar->SetFlameCylinderVisible(false);
+		OwnerChar->SetFlameVisible(false);
 	}
 	else
 	{
