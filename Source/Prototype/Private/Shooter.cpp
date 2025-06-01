@@ -93,7 +93,13 @@ FVector UShooter::GetActualLineTraceStartLocation() const
 // Shooter.cpp
 FVector UShooter::GetVisualCylinderStartLocation() const
 {
-	if (!OwnerChar) { return FVector::ZeroVector; }
+	if (!OwnerChar)
+	{
+		// UE_LOG(LogTemp, Error, TEXT("GetVisualCylinderStartLocation: OwnerChar is NULL!"));
+		if (GetOwner()) return GetOwner()->GetActorLocation(); // 안전장치: 컴포넌트 소유주 액터 위치
+		return FVector::ZeroVector; // 최후의 폴백
+	}
+
 	APrototypeCharacter* ProtoChar = Cast<APrototypeCharacter>(OwnerChar);
 
 	// AttachedBusterMeshComponent (예: SM_Rachel_Buster)와 NozzleSocketNameOnBusterMesh 사용
@@ -102,15 +108,23 @@ FVector UShooter::GetVisualCylinderStartLocation() const
 		UMeshComponent* ActualBusterMesh = Cast<UMeshComponent>(ProtoChar->AttachedBusterMeshComponent);
 		if (ActualBusterMesh && ProtoChar->NozzleSocketNameOnBusterMesh != NAME_None && ActualBusterMesh->DoesSocketExist(ProtoChar->NozzleSocketNameOnBusterMesh))
 		{
-			return ActualBusterMesh->GetSocketLocation(ProtoChar->NozzleSocketNameOnBusterMesh); // "Buster 메시"의 "Nozzle" 소켓
+			// 로그 추가: 실제 Nozzle 소켓 위치 반환 확인
+			FVector NozzleLocation = ActualBusterMesh->GetSocketLocation(ProtoChar->NozzleSocketNameOnBusterMesh);
+			// UE_LOG(LogTemp, Warning, TEXT("GetVisualCylinderStartLocation: Returning Nozzle Socket Location: %s"), *NozzleLocation.ToString());
+			return NozzleLocation; // "Buster 메시"의 "Nozzle" 소켓
 		}
-		// 소켓 못 찾으면 "Buster 메시"의 원점이라도 반환
-		if (ActualBusterMesh) return ActualBusterMesh->GetComponentLocation();
-		// UE_LOG(LogTemp, Warning, TEXT("Nozzle socket not found or invalid mesh for AttachedBusterMeshComponent. Using its origin or fallback."));
+
+		// Nozzle 소켓을 못 찾았거나 이름이 설정 안된 경우, Buster 메시의 원점이라도 반환
+		if (ActualBusterMesh)
+		{
+			// UE_LOG(LogTemp, Warning, TEXT("GetVisualCylinderStartLocation: Nozzle socket '%s' not found on '%s' or name is None. Returning component origin."), *ProtoChar->NozzleSocketNameOnBusterMesh.ToString(), *ActualBusterMesh->GetName());
+			return ActualBusterMesh->GetComponentLocation();
+		}
 	}
-	// 최종 폴백: 라인 트레이스 시작점과 동일하게 처리 (또는 다른 적절한 위치)
-	// UE_LOG(LogTemp, Warning, TEXT("AttachedBusterMeshComponent not set. Visual cylinder falling back to LineTraceStart."));
-	return GetActualLineTraceStartLocation();
+
+	// AttachedBusterMeshComponent가 설정되지 않은 경우, 최종 폴백으로 물리 트레이스 시작점 사용
+	// UE_LOG(LogTemp, Warning, TEXT("GetVisualCylinderStartLocation: AttachedBusterMeshComponent not set. Visual cylinder falling back to physics LineTraceStart."));
+	return GetActualLineTraceStartLocation(); // GetActualLineTraceStartLocation은 "Buster" 소켓 위치를 반환
 }
 /*--------------------- 입력 래퍼 (본문 이동) ---------------------*/
 void UShooter::Grab() {
