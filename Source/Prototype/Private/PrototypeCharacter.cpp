@@ -37,7 +37,7 @@ APrototypeCharacter::APrototypeCharacter()
 	/* 이동 세팅 (기존 코드 유지) */
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 540.f, 0.f);
-	GetCharacterMovement()->JumpZVelocity = 600.f;
+	GetCharacterMovement()->JumpZVelocity = 500.f;		// 600은 인간 스프링임
 	GetCharacterMovement()->AirControl = 0.3f;
 
 	/* 카메라 (기존 코드 유지) */
