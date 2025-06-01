@@ -2,26 +2,27 @@
 
 
 #include "EnergyItem.h"
-#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "PrototypeCharacter.h"
+
 // Sets default values
 AEnergyItem::AEnergyItem()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-    boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("boxComp"));
-    SetRootComponent(boxComp);
+    sphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("sphereComp"));
+    SetRootComponent(RootComponent);
  
-    boxComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-    boxComp->SetCollisionResponseToAllChannels(ECR_Ignore);
-    boxComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+    sphereComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    sphereComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+    sphereComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 
     meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
-    meshComp->SetupAttachment(boxComp);
+    meshComp->SetupAttachment(sphereComp);
 
-    boxComp->OnComponentBeginOverlap.AddDynamic(this, &AEnergyItem::OnOverlapBegin);
+    sphereComp->OnComponentBeginOverlap.AddDynamic(this, &AEnergyItem::OnOverlapBegin);
 }
 
 // Called when the game starts or when spawned
