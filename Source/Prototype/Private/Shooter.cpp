@@ -283,92 +283,103 @@ void UShooter::UpdateLineTrace()
 	DrawDebugLine(GetWorld(), LineStart, LineEnd, LineColor, false, 0.0f, 0, 2.0f);
 }
 
+// Shooter.cpp
+
 void UShooter::UpdateGrabbedPhysics(float DeltaTime)
 {
-	if (!GrabbedComponent) return;
-	// --- 시작: 새로운 로직 - 캐릭터/물체가 외부 요인으로 가까워지면 GrabbedObjectDistance 업데이트 ---
-	// 현재 Grab() 및 Scroll() 함수에서 GrabbedObjectDistance와 PhysicsHandle의 TargetLocation이
-	// OwnerChar->GetActorLocation()을 기준으로 계산되므로, 여기서도 동일한 기준을 사용합니다.
-	 // --- 시작: 수정된 로직 - 캐릭터/물체가 외부 요인으로 '확실히' 가까워지면 GrabbedObjectDistance 업데이트 ---
-	float CurrentActualDistanceToObject = FVector::Dist(OwnerChar->GetActorLocation(), GrabbedComponent->GetComponentLocation());
+	// GrabbedComponent나 OwnerChar가 유효하지 않으면 아무것도 하지 않음
+	if (!GrabbedComponent || !OwnerChar) return;
 
-	// 실제 거리가 (현재 설정된 유지 거리 - 임계값)보다 짧아졌을 때만 GrabbedObjectDistance 업데이트
+	// --- 시작: 캐릭터/물체가 외부 요인으로 가까워지면 GrabbedObjectDistance 업데이트 ---
+	// 이 로직은 이전 답변에서 추가한 내용이며, 그대로 유지합니다.
+	float CurrentActualDistanceToObject = FVector::Dist(OwnerChar->GetActorLocation(), GrabbedComponent->GetComponentLocation());
 	if (CurrentActualDistanceToObject < (GrabbedObjectDistance - GrabDistanceAdaptThreshold))
 	{
 		GrabbedObjectDistance = CurrentActualDistanceToObject;
 		GrabbedObjectDistance = FMath::Max(GrabbedObjectDistance, GrabMinDistance);
 		UE_LOG(LogTemp, Log, TEXT("GrabbedObjectDistance adapted due to significant proximity: %f"), GrabbedObjectDistance);
 	}
-	// --- 끝: 새로운 로직 ---
-	// --- 조준 기반 물체 놓기 로직 ---
+	// --- 끝: GrabbedObjectDistance 업데이트 로직 ---
+
+
+	// --- 시작: 조준 기반 물체 놓기 로직 (Sphere Trace 사용으로 변경) ---
 	FVector AimCheckStartLocation = GetActualLineTraceStartLocation(); // 라인 트레이스 시작점 (예: Nozzle 소켓)
 	FVector AimDirection = OwnerChar->GetActorForwardVector();         // 캐릭터가 바라보는 방향
 
-	// 조준 확인용 라인 트레이스 길이 설정:
-	// 현재 물체를 유지하려는 거리(GrabbedObjectDistance)에 약간의 허용치(MaxGrabStretchTolerance)를 더한 값 사용
 	float AimCheckLength = GrabbedObjectDistance + MaxGrabStretchTolerance;
-	// 최소한 GrabMinDistance보다는 길게 설정 (물체가 매우 가까이 있을 경우 대비)
 	if (AimCheckLength < GrabMinDistance) AimCheckLength = GrabMinDistance;
 
 	FVector AimCheckEndLocation = AimCheckStartLocation + AimDirection * AimCheckLength;
 
 	FHitResult AimHitResult;
 	FCollisionQueryParams AimParams;
-	AimParams.AddIgnoredActor(OwnerChar); // 캐릭터는 무시
+	AimParams.AddIgnoredActor(OwnerChar);
 
-	bool bAimHitSomething = GetWorld()->LineTraceSingleByChannel(
+	// Sphere Trace를 위한 반지름 설정 (이 값을 조절하여 민감도 변경)
+	// TODO: 이 값을 UPROPERTY로 만들어 Shooter.h에서 설정 가능하게 하고, 생성자에서 초기화하는 것을 고려해보세요.
+	const float AimCheckRadius = 25.0f; // 예시 반지름: 10 유닛. 물체 크기나 게임 느낌에 맞춰 조절하세요.
+	FCollisionShape SphereToSweep = FCollisionShape::MakeSphere(AimCheckRadius);
+
+	bool bAimHitSomething = GetWorld()->SweepSingleByChannel( // LineTrace에서 Sweep으로 변경
 		AimHitResult,
-		AimCheckStartLocation,
-		AimCheckEndLocation,
-		ECC_PhysicsBody, // 잡고 있는 물체와 동일한 콜리전 채널 사용
+		AimCheckStartLocation,    // 스윕 시작점
+		AimCheckEndLocation,      // 스윕 끝점
+		FQuat::Identity,          // 구체의 회전 (구체는 회전이 의미 없으므로 기본값)
+		ECC_PhysicsBody,          // 콜리전 채널 (잡고 있는 물체와 동일한 채널)
+		SphereToSweep,            // 스윕할 구체 모양
 		AimParams);
 
 	bool bStillAimingAtGrabbedObject = false;
 	if (bAimHitSomething)
 	{
-		// 라인 트레이스에 맞은 컴포넌트가 현재 잡고 있는 GrabbedComponent와 동일한지 확인
+		// 스윕에 맞은 컴포넌트가 현재 잡고 있는 GrabbedComponent와 동일한지 확인
 		if (AimHitResult.GetComponent() == GrabbedComponent)
 		{
 			bStillAimingAtGrabbedObject = true;
 		}
 	}
 
-	// 디버그를 위해 조준 확인용 라인 트레이스를 그려볼 수 있습니다.
-	 DrawDebugLine(GetWorld(), AimCheckStartLocation, AimCheckEndLocation, bStillAimingAtGrabbedObject ? FColor::Cyan : FColor::Orange, false, 0.0f, 0, 1.0f);
-
-	if (!bStillAimingAtGrabbedObject) // 만약 조준이 잡고 있는 물체에서 벗어났다면
+	// 디버그를 위해 조준 확인용 스윕 경로를 그려볼 수 있습니다.
+	// 시작점과 끝점에 작은 구를 그리고, 그 사이를 선으로 연결하여 스윕 범위를 대략적으로 시각화합니다.
+	if (GetWorld()) // GetWorld()가 유효한지 확인
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Shooter: Aim moved off grabbed object. Releasing."));
+		FColor DebugColor = bStillAimingAtGrabbedObject ? FColor::Cyan : FColor::Orange;
+		// DrawDebugSphere(GetWorld(), AimCheckStartLocation, AimCheckRadius, 12, DebugColor, false, -1.f, 0, 1.f);
+		// DrawDebugSphere(GetWorld(), AimCheckEndLocation, AimCheckRadius, 12, DebugColor, false, -1.f, 0, 1.f);
+		DrawDebugLine(GetWorld(), AimCheckStartLocation, AimCheckEndLocation, DebugColor, false, -1.0f, 0, 1.f); // 중심선
+	}
+
+
+	if (!bStillAimingAtGrabbedObject) // 만약 조준(스윕)이 잡고 있는 물체에서 벗어났다면
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Shooter: Aim (SphereTrace) moved off grabbed object. Releasing."));
 		Release(); // 물체를 놓습니다.
 		return;    // 물체를 놓았으므로 이 프레임에서는 더 이상 처리할 필요가 없습니다.
 	}
 	// --- 여기까지 조준 기반 물체 놓기 로직 ---
 
+
+	// PhysicsHandle의 목표 위치 업데이트 (이 부분은 기존 로직과 동일)
 	FVector TargetLocation = OwnerChar->GetActorLocation() +
 		OwnerChar->GetActorForwardVector() * GrabbedObjectDistance;
 
 	PhysicsHandle->InterpolationSpeed = 100.0f;
 	PhysicsHandle->SetTargetLocation(TargetLocation);
-	
+
+	// GrabVisualMesh 업데이트 (이 부분도 기존 로직과 동일)
 	if (GrabVisualMesh)
 	{
-		FVector Start = GetVisualCylinderStartLocation(); // <--- 여기를 수정! (Nozzle 소켓 위치)
+		FVector Start = GetVisualCylinderStartLocation();
 		FVector End = TargetLocation;
 		FVector RopeDir = End - Start;
 		float Length = RopeDir.Size();
 		if (Length < KINDA_SMALL_NUMBER)
 		{
 			GrabVisualMesh->SetVisibility(false);
-			return;
+			return; // GrabVisualMesh 업데이트 로직만 중단
 		}
 		FVector Mid = (Start + End) * 0.5f;
-
-		/*FVector CameraDir = FollowCamera->GetForwardVector();
-		float AngleDeg = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(
-			CameraDir, RopeDir.GetSafeNormal())));
-		float Thickness = (AngleDeg < 15.0f) ? 3.0f : 0.2f;*/
-		float ConstantMyThickness = 0.1f; // <--- 원하는 고정 두께 값으로 설정
-
+		float ConstantMyThickness = 0.1f;
 		float ScaleZ = Length / 100.0f;
 
 		GrabVisualMesh->SetVisibility(true);
