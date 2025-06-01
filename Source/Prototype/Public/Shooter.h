@@ -79,6 +79,8 @@ private:
 	// Swing
 	UPROPERTY(EditAnywhere, Category = "Swing") float CorrectionStrength = 500.f;
 	UPROPERTY(EditAnywhere, Category = "Swing") float SwingForce = 1200.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Visuals")
+	UStaticMesh* RopeMeshAsset;
 
 	// 안전 위치 히스토리
 	TArray<FVector> SafeLocationHistory;

@@ -21,7 +21,7 @@ UShooter::UShooter()
 	GrabVisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GrabVisualMesh->SetVisibility(false);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshAsset(
-		TEXT("/Game/Meshes/SM_GrabCylinder.SM_GrabCylinder"));
+		TEXT("/Game/Meshes/Cube.Cube"));
 	if (MeshAsset.Succeeded())
 		GrabVisualMesh->SetStaticMesh(MeshAsset.Object);
 
@@ -292,7 +292,7 @@ void UShooter::UpdateGrabbedPhysics(float DeltaTime)
 		float AngleDeg = FMath::RadiansToDegrees(FMath::Acos(FVector::DotProduct(
 			CameraDir, RopeDir.GetSafeNormal())));
 		float Thickness = (AngleDeg < 15.0f) ? 3.0f : 0.2f;*/
-		float ConstantMyThickness = 0.2f; // <--- 원하는 고정 두께 값으로 설정
+		float ConstantMyThickness = 0.1f; // <--- 원하는 고정 두께 값으로 설정
 
 		float ScaleZ = Length / 100.0f;
 
@@ -353,7 +353,7 @@ void UShooter::UpdateGrabbedNonPhysics(float DeltaTime)
 			float AngleDeg = FMath::RadiansToDegrees(FMath::Acos(
 				FVector::DotProduct(CameraDir, VisualRopeDir.GetSafeNormal())));
 			// float Thickness = (AngleDeg < 15.0f) ? 3.0f : 0.2f; // 기존 두께 로직
-			float ConstantThickness = 0.5f; // 코드에 있던 고정 두께 사용
+			float ConstantThickness = 0.1f; // 코드에 있던 고정 두께 사용
 			float ScaleZ = Length / 100.0f;
 
 			GrabVisualMesh->SetVisibility(true);
