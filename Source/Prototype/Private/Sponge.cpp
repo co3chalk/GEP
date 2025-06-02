@@ -85,9 +85,10 @@ void ASponge::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
             UnLockMotion();
             staticMesh->SetSimulatePhysics(true);
 
-            if (ChangedMaterial)
+            if (ChangedStaticMesh)
             {
-                staticMesh->SetMaterial(0, ChangedMaterial);
+                staticMesh->SetStaticMesh(ChangedStaticMesh);
+                staticMesh->SetWorldScale3D(FVector(1.0f, 1.0f, 1.2f));
             }
         }
 

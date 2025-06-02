@@ -35,8 +35,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Weight")
 	float WeightThreshold = 10.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Material")
-	UMaterialInterface* ChangedMaterial;
+	/*UPROPERTY(EditAnywhere, Category = "Material")
+	UMaterialInterface* ChangedMaterial;*/
+
+	UPROPERTY(EditAnywhere)
+		UStaticMesh* ChangedStaticMesh;
 
 	UFUNCTION()
 	void OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
