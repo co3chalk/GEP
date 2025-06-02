@@ -69,7 +69,7 @@ void AWaterSwitch::SetTargetsPowered(bool bOn)
         if (bOn)
         {
             FRotator NewRotation = TargetActor->GetActorRotation();
-            NewRotation.Roll += 180.f;
+            NewRotation.Yaw += 180.f;
             TargetActor->SetActorRotation(NewRotation);
         }
     }
