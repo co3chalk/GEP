@@ -20,8 +20,11 @@ class UInputManager;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHPChangedDelegate, int32, CurrentHP, int32, MaxHP);
 // 무적 상태 변경 시 호출될 델리게이트 선언
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInvincibilityChangedDelegate, bool, bIsNowInvincible);
-// 무기 변경 시 호출될 델리게이트 선언 (새로 추가 또는 이전 제안 유지)
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponChangedDelegate, const FString&, NewWeaponName); //
+// 무기 변경 시 호출될 델리게이트 선언
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponChangedDelegate, const FString&, NewWeaponName);
+// 에너지 개수 변경 시 호출될 델리게이트 선언 (새로 추가)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnergyCountChangedDelegate, int32, NewEnergyCount);
+
 
 UCLASS()
 class PROTOTYPE_API APrototypeCharacter : public ACharacter
@@ -52,15 +55,49 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Health")
 	FOnInvincibilityChangedDelegate OnInvincibilityChanged;
 
-	// 현재 무기 이름을 반환하는 함수 (새로 추가)
+	// 현재 무기 이름을 반환하는 함수
 	UFUNCTION(BlueprintPure, Category = "Weapon")
 	FString GetCurrentWeaponName() const;
 
-	// 이 델리게이트에 PlayerUIWidget이 바인딩합니다. (새로 추가)
+	// 이 델리게이트에 PlayerUIWidget이 바인딩합니다.
 	UPROPERTY(BlueprintAssignable, Category = "Weapon")
 	FOnWeaponChangedDelegate OnWeaponChanged;
 
 	void NotifyWeaponChanged();
+
+	/* --- 에너지 관련 --- */
+	// 에너지 값 GET 함수들 (BlueprintPure로 UI에서 직접 현재 값을 가져갈 수도 있도록)
+	UFUNCTION(BlueprintPure, Category = "Energy")
+	int32 GetBasicEnergy() const { return basicEnergy; }
+
+	UFUNCTION(BlueprintPure, Category = "Energy")
+	int32 GetFlameEnergy() const { return flameEnergy; }
+
+	UFUNCTION(BlueprintPure, Category = "Energy")
+	int32 GetWaterEnergy() const { return waterEnergy; }
+
+	UFUNCTION(BlueprintPure, Category = "Energy")
+	int32 GetElectricEnergy() const { return electricEnergy; }
+
+	// 에너지 변경 델리게이트 (새로 추가)
+	UPROPERTY(BlueprintAssignable, Category = "Energy")
+	FOnEnergyCountChangedDelegate OnBasicEnergyChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Energy")
+	FOnEnergyCountChangedDelegate OnFlameEnergyChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Energy")
+	FOnEnergyCountChangedDelegate OnWaterEnergyChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Energy")
+	FOnEnergyCountChangedDelegate OnElectricEnergyChanged;
+
+	// 에너지 획득 함수 (기존 유지, 내부에서 델리게이트 호출하도록 .cpp에서 수정)
+	void SetGetBasicEnergy(bool bValue);
+	void SetGetFlameEnergy(bool bValue);
+	void SetGetWaterEnergy(bool bValue);
+	void SetGetElectricEnergy(bool bValue);
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -88,26 +125,32 @@ protected:
 	void HandleHPChange();
 	void Die();
 
-	// 현재 무기 이름을 저장할 변수 (새로 추가)
+	// 현재 무기 이름을 저장할 변수
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon", meta = (AllowPrivateAccess = "true"))
 	FString CurrentWeaponDisplayName;
+
+	/* --- 에너지 관련 int 변수 (기존 코드 유지) --- */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy") // 카테고리명 일관성 위해 Basic_Energy -> Energy
+		int basicEnergy = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy") // Flame_Energy -> Energy
+		int flameEnergy = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy") // Water_Energy -> Energy
+		int waterEnergy = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy") // Elctric_Energy -> Energy (오타 수정)
+		int electricEnergy = 0;
 
 public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// 라인 트레이서 시작점용 소켓 이름을 저장할 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (DisplayName = "Physics Trace Start Socket Name"))
 	FName CharacterMuzzleSocketName;
 
-	// 실린더 비주얼 시작점용 "버스터 메시" 컴포넌트 참조
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Combat")
 	USceneComponent* AttachedBusterMeshComponent;
 
-	// 위 AttachedBusterMeshComponent 위의 "Nozzle" 소켓 이름
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	FName NozzleSocketNameOnBusterMesh;
-
 
 	/* 이동 & 점프 (기존 코드 유지) */
 	void MoveForward(float Value);
@@ -124,21 +167,6 @@ public:
 	FRotator RotationTarget;
 	TFunction<void()> PostRotationAction;
 
-	/* 에너지 관련 int 변수 (기존 코드 유지) */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Basic_Energy")
-	int basicEnergy = 0;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Flame_Energy")
-	int flameEnergy = 0;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Water_Energy")
-	int waterEnergy = 0;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Elctric_Energy")
-	int electricEnergy = 0;
-
-	void SetGetBasicEnergy(bool bValue);
-	void SetGetFlameEnergy(bool bValue);
-	void SetGetWaterEnergy(bool bValue);
-	void SetGetElectricEnergy(bool bValue);
-
 	/* --- 불기둥 제어함수 (기존 코드 유지) --- */
 	void SetFlameVisible(bool bVisible);
 
@@ -150,10 +178,10 @@ private:
 	UPROPERTY(VisibleAnywhere) UCameraComponent* FollowCamera;
 
 	/* --- 화염방사 실린더 및 콜라이더 (기존 코드 유지) --- */
-	UPROPERTY(VisibleAnywhere) class UStaticMeshComponent* FlameCylinderMesh;	//원래 있던 메시
+	UPROPERTY(VisibleAnywhere) class UStaticMeshComponent* FlameCylinderMesh;
 	UPROPERTY(VisibleAnywhere) class UParticleSystemComponent* FlameParticle;
 	UPROPERTY(VisibleAnywhere, Category = "Flame")
-	UCapsuleComponent* FlameCollider;
+	class UCapsuleComponent* FlameCollider; // UCapsuleComponent* 로 수정
 	bool bFlameCylinderVisible = false;
 
 	/* --- 무기 컴포넌트 (기존 코드 유지) --- */
