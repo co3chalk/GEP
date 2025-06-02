@@ -3,6 +3,8 @@
 
 #include "PortalBase.h"
 #include "Components/StaticMeshComponent.h" 
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -29,14 +31,56 @@ APortalBase::APortalBase()
     }
 
     DestinationMapName = NAME_None; // 기본값 초기화
+
+    PortalEffectComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("PortalEffectComponent"));
+    if (PortalEffectComponent)
+    {
+        // 포탈 메시가 있다면 그곳에, 없다면 루트에 붙입니다.
+        // 또는 포탈 효과의 중심이 될 특정 SceneComponent를 만들어서 붙일 수도 있습니다.
+        if (PortalMeshComponent)
+        {
+            PortalEffectComponent->SetupAttachment(PortalMeshComponent);
+        }
+        else
+        {
+            PortalEffectComponent->SetupAttachment(RootComponent);
+        }
+        PortalEffectComponent->SetAutoActivate(false); // 기본적으로는 자동 활성화하지 않음
+    }
+
+    PortalEffectAsset = nullptr; // 기본값은 없음
+    bAutoActivatePortalEffectOnBeginPlay = true; // 기본적으로는 BeginPlay 시 자동 활성화
+
 }
 
+// Called when the game starts or when spawned
 // Called when the game starts or when spawned
 void APortalBase::BeginPlay()
 {
     Super::BeginPlay();
 
-    // 오버랩 이벤트에 함수 바인딩
+    // --- 시작: 나이아가라 효과 설정 및 활성화 로직 추가 ---
+    if (PortalEffectComponent && PortalEffectAsset) // 컴포넌트와 에셋이 모두 유효한지 확인
+    {
+        PortalEffectComponent->SetAsset(PortalEffectAsset); // 블루프린트에서 설정한 에셋을 컴포넌트에 할당
+
+        if (bAutoActivatePortalEffectOnBeginPlay) // 자동 활성화 옵션이 켜져 있다면
+        {
+            PortalEffectComponent->Activate(true); // 나이아가라 효과 활성화 (true는 이미 활성화된 경우 재시작)
+            UE_LOG(LogTemp, Log, TEXT("PortalBase: Niagara effect activated on BeginPlay."));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Log, TEXT("PortalBase: Niagara effect asset set, but bAutoActivatePortalEffectOnBeginPlay is false."));
+        }
+    }
+    else if (!PortalEffectAsset)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("PortalBase: PortalEffectAsset is not set. Niagara effect cannot be played."));
+    }
+    // --- 끝: 나이아가라 효과 설정 및 활성화 로직 추가 ---
+
+    // 오버랩 이벤트에 함수 바인딩 (이 부분은 기존과 동일하게 유지)
     if (TriggerVolume)
     {
         TriggerVolume->OnComponentBeginOverlap.AddDynamic(this, &APortalBase::OnPortalOverlap);

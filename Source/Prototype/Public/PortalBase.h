@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "PortalBase.generated.h"
+class UStaticMeshComponent; // 이미 전방 선언되어 있을 수 있지만, 명시적으로 추가
+class UNiagaraComponent;    // 나이아가라 컴포넌트를 위한 전방 선언
+class UNiagaraSystem;       // 나이아가라 시스템 에셋을 위한 전방 선언
 
 UCLASS()
 class PROTOTYPE_API APortalBase : public AActor
@@ -15,6 +18,21 @@ class PROTOTYPE_API APortalBase : public AActor
 public:
     // Sets default values for this actor's properties
     APortalBase();
+    // --- 시작: 나이아가라 효과 관련 프로퍼티 ---
+
+  // 블루프린트에서 이 포탈에 사용할 나이아가라 시스템 에셋을 지정합니다.
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal FX", meta = (DisplayName = "Portal Effect Asset"))
+    UNiagaraSystem* PortalEffectAsset;
+
+    // 지정된 에셋으로 나이아가라 효과를 재생할 컴포넌트입니다.
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Portal FX", meta = (DisplayName = "Portal Effect Component"))
+    UNiagaraComponent* PortalEffectComponent;
+
+    // (선택 사항) 게임 시작 시 포탈 효과를 자동으로 활성화할지 여부
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal FX")
+    bool bAutoActivatePortalEffectOnBeginPlay;
+
+    // --- 끝: 나이아가라 효과 관련 프로퍼티 ---
 
 protected:
     // Called when the game starts or when spawned
