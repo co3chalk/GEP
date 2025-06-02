@@ -42,6 +42,7 @@ void AWaterSwitch::OnBegin(UPrimitiveComponent* /*OverlappedComp*/,
     bool /*bFromSweep*/,
     const FHitResult& /*SweepResult*/)
 {
+    UE_LOG(LogTemp, Warning, TEXT("Water Trigger on!")); //
     if (++OverlapCount == 1)
     {
         SetTargetsPowered(true);
