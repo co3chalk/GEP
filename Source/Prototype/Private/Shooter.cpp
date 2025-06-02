@@ -131,16 +131,51 @@ FVector UShooter::GetVisualCylinderStartLocation() const
 }
 /*--------------------- 입력 래퍼 (본문 이동) ---------------------*/
 
+#include "Shooter.h"
+#include "PrototypeCharacter.h"
+#include "EnemyActor.h"
+#include "Camera/CameraComponent.h"
+#include "Components/SceneComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "PhysicsEngine/PhysicsConstraintComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Components/SkeletalMeshComponent.h" // 캐릭터의 GetMesh()가 반환하는 타입
+
+// (생성자, BeginPlay, TickComponent 등 다른 함수들은 기존 코드와 동일하다고 가정합니다)
+// ... 다른 함수 코드들 ...
+
 void UShooter::Grab() {
 	// 1. 라인 트레이스가 유효한 프리미티브 컴포넌트를 맞췄는지 먼저 확인합니다.
-	UE_LOG(LogTemp, Error, TEXT("!!!!!!!!!!!!!! UShooter::Grab() FUNCTION HAS BEEN CALLED !!!!!!!!!!!!!!")); // 눈에 잘 띄도록 Error 레벨과 특수문자 사용
+	UE_LOG(LogTemp, Error, TEXT("!!!!!!!!!!!!!! UShooter::Grab() FUNCTION HAS BEEN CALLED !!!!!!!!!!!!!!"));
 
 	if (bIsLineTraceHit && CachedHitResult.GetComponent())
 	{
-		
-		UPrimitiveComponent* HitComponent = CachedHitResult.GetComponent();
+		UPrimitiveComponent* HitComponent = CachedHitResult.GetComponent(); // 이미 여기서 유효한 컴포넌트임을 확인
 		AActor* HitActor = CachedHitResult.GetActor();
 
+		// --- 시작: 추가된 HitActor Null 체크 ---
+		if (!HitActor)
+		{
+			// 로그를 통해 어떤 컴포넌트가 액터를 반환하지 않았는지 확인
+			// HitComponent는 위의 if 조건문에서 유효성을 이미 확인했으므로 사용 가능
+			UE_LOG(LogTemp, Warning, TEXT("UShooter::Grab - HitComponent '%s' (Class: %s) did not return a valid Actor. Grab attempt aborted."),
+				*GetNameSafe(HitComponent),
+				*GetNameSafe(HitComponent->GetClass()) // GetClass()는 HitComponent가 유효하므로 안전
+			);
+
+			// 그랩 시도 실패 처리 (기존 코드의 맨 아래 else 블록과 유사하게 처리)
+			MissedGrabTarget = LineEnd; // LineEnd는 UpdateLineTrace에서 계산된 값
+			MissedGrabTimer = MissedGrabDuration;
+			bShowMissedGrabVisual = true;
+			return; // HitActor가 없으므로 함수 종료
+		}
+		// --- 종료: 추가된 HitActor Null 체크 ---
+
+		// 이제 HitActor는 유효함이 보장됩니다. 기존 로직을 계속 진행합니다.
 		FString ActorName = HitActor->GetName();
 		int32 NumTags = HitActor->Tags.Num();
 		FString AllTagsConcatenated = "";
@@ -152,10 +187,15 @@ void UShooter::Grab() {
 		else {
 			AllTagsConcatenated = TEXT("None");
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Shooter: Attempting to grab '%s'. Tags found: %d. Tags: [%s]"), *ActorName, NumTags, *AllTagsConcatenated);
+		UE_LOG(LogTemp, Warning, TEXT("Shooter: Attempting to grab '%s' (Class: %s). Tags found: %d. Tags: [%s]"),
+			*ActorName,
+			*HitActor->GetClass()->GetName(), // 클래스 정보도 로그에 추가하면 유용
+			NumTags,
+			*AllTagsConcatenated
+		);
 
-		// 2. 맞은 액터가 어떤 태그라도 가지고 있는지 확인
-		if (HitActor && HitActor->Tags.Num() > 0)
+		// 2. 맞은 액터가 어떤 태그라도 가지고 있는지 확인 (이제 HitActor는 null이 아님이 보장됨)
+		if (HitActor->Tags.Num() > 0) // HitActor 자체에 대한 null 체크는 위에서 이미 수행됨
 		{
 			// 액터가 하나 이상의 태그를 가지고 있다면 그랩하지 않음
 			UE_LOG(LogTemp, Warning, TEXT("Shooter: Object '%s' has tag(s) (Total: %d). Grab ignored."), *HitActor->GetName(), HitActor->Tags.Num());
@@ -173,8 +213,6 @@ void UShooter::Grab() {
 		if (HitComponent->IsSimulatingPhysics())
 		{
 			// 물리 오브젝트 그랩 로직 (GrabbedObjectDistance 계산 시 시작점 기준 등 이전 수정사항 반영)
-			// 중요: 이 부분의 OwnerChar->GetActorLocation()은 GetActualLineTraceStartLocation()으로 바꿔야
-			// 라인 트레이스 시작점과 그랩 거리 계산 기준이 일치합니다. 현재는 그대로 두었습니다.
 			FVector GrabStartPointForDistanceCalc = OwnerChar->GetActorLocation(); // 또는 GetActualLineTraceStartLocation();
 			float CurrentDistance = FVector::Dist(GrabStartPointForDistanceCalc, HitComponent->GetComponentLocation());
 			if (CurrentDistance < GrabMinDistance || CurrentDistance > GrabMaxDistance) return;
@@ -187,7 +225,6 @@ void UShooter::Grab() {
 
 			PhysicsHandle->GrabComponentAtLocation(HitComponent, NAME_None, HitComponent->GetComponentLocation());
 			PhysicsHandle->InterpolationSpeed = 100.0f;
-			// PhysicsHandle 목표 위치도 GrabStartPointForDistanceCalc 기준으로 설정
 			PhysicsHandle->SetTargetLocation(GrabStartPointForDistanceCalc + OwnerChar->GetActorForwardVector() * GrabbedObjectDistance);
 
 			RotationConstraint->SetWorldLocation(HitComponent->GetComponentLocation());
@@ -215,28 +252,17 @@ void UShooter::Grab() {
 				OwnerChar->GetCharacterMovement()->Velocity = CurrentVelocity;
 				OwnerChar->GetCharacterMovement()->bOrientRotationToMovement = false;
 			}
-			// DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor(128, 0, 128), false, 1.0f, 0, 2.0f); // UpdateLineTrace에서 그림
 			NonPhysicsHitLocation = CachedHitResult.ImpactPoint;
-			// NonPhysicsGrabDistance 계산도 라인 트레이스 시작점 기준
 			FVector GrabStartPointForDistanceCalc = OwnerChar->GetActorLocation(); // 또는 GetActualLineTraceStartLocation();
 			NonPhysicsGrabDistance = FVector::Dist(GrabStartPointForDistanceCalc, NonPhysicsHitLocation);
 			bIsGrabbingNonPhysics = true;
 		}
-		// 그랩에 성공했으므로, 놓친 비주얼 관련 플래그는 확실히 꺼줍니다.
-		// (물론 TickComponent에서 다음 프레임에 bShowMissedGrabVisual이 false로 바뀔 수 있지만, 즉각적인 반응을 위해)
-		// bShowMissedGrabVisual = false; // 필요하다면 추가
 	}
 	else // 라인 트레이스가 아무것도 맞추지 못했거나 유효하지 않은 컴포넌트인 경우
 	{
 		MissedGrabTarget = LineEnd; // LineEnd는 UpdateLineTrace에서 계산된 값
 		MissedGrabTimer = MissedGrabDuration;
 		bShowMissedGrabVisual = true;
-
-		// if (GrabVisualMesh) // 이 부분은 TickComponent에서 나이아가라/실린더를 관리하므로 여기서 직접 제어 X
-		// {
-		//     GrabVisualMesh->SetVisibility(true); 
-		// }
-		// return; // 여기서 return은 불필요 (함수 끝이므로)
 	}
 }
 void UShooter::Release() {
