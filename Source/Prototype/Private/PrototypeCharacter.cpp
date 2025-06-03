@@ -318,32 +318,32 @@ void APrototypeCharacter::NotifyWeaponChanged()
 /* --- 에너지 획득 함수 구현 (델리게이트 방송 추가) --- */
 void APrototypeCharacter::SetGetBasicEnergy(bool bValue)
 {
-    basicEnergy++;
-    UpdateEnergyUI();
+    basicEnergy--;
+    UpdateBEnergyUI();
     OnBasicEnergyChanged.Broadcast(basicEnergy); // 델리게이트 방송
     UE_LOG(LogTemp, Log, TEXT("Basic Energy changed: %d"), basicEnergy);
 }
 
 void APrototypeCharacter::SetGetFlameEnergy(bool bValue)
 {
-    flameEnergy++;
-    UpdateEnergyUI();
+    flameEnergy--;
+    UpdateFEnergyUI();
     OnFlameEnergyChanged.Broadcast(flameEnergy); // 델리게이트 방송
     UE_LOG(LogTemp, Log, TEXT("Flame Energy changed: %d"), flameEnergy);
 }
 
 void APrototypeCharacter::SetGetWaterEnergy(bool bValue)
 {
-    waterEnergy++;
-    UpdateEnergyUI();
+    waterEnergy--;
+    UpdateWEnergyUI();
     OnWaterEnergyChanged.Broadcast(waterEnergy); // 델리게이트 방송
     UE_LOG(LogTemp, Log, TEXT("Water Energy changed: %d"), waterEnergy);
 }
 
 void APrototypeCharacter::SetGetElectricEnergy(bool bValue)
 {
-    electricEnergy++;
-    UpdateEnergyUI();
+    electricEnergy--;
+    UpdateEEnergyUI();
     OnElectricEnergyChanged.Broadcast(electricEnergy); // 델리게이트 방송
     UE_LOG(LogTemp, Log, TEXT("Electric Energy changed: %d"), electricEnergy);
 }

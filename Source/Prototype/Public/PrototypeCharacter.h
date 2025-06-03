@@ -128,14 +128,14 @@ protected:
 	FString CurrentWeaponDisplayName;
 
 	/* --- 에너지 관련 int 변수 (기존 코드 유지) --- */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy") // 카테고리명 일관성 위해 Basic_Energy -> Energy
-		int basicEnergy = 0;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy") // Flame_Energy -> Energy
-		int flameEnergy = 0;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy") // Water_Energy -> Energy
-		int waterEnergy = 0;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Energy") // Elctric_Energy -> Energy (오타 수정)
-		int electricEnergy = 0;
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Energy") // 카테고리명 일관성 위해 Basic_Energy -> Energy
+		int basicEnergy = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Energy") // Flame_Energy -> Energy
+		int flameEnergy = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Energy") // Water_Energy -> Energy
+		int waterEnergy = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Energy") // Elctric_Energy -> Energy (오타 수정)
+		int electricEnergy = 3;
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -174,7 +174,13 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void UpdateWeaponUI();// 구현은 블루프린트
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
-	void UpdateEnergyUI();// 구현은 블루프린트
+	void UpdateBEnergyUI();// 구현은 블루프린트
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+	void UpdateFEnergyUI();// 구현은 블루프린트
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+	void UpdateWEnergyUI();// 구현은 블루프린트
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+	void UpdateEEnergyUI();// 구현은 블루프린트
 
 private:
 	/* --- 카메라 컴포넌트 (기존 코드 유지) --- */
