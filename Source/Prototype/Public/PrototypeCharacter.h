@@ -34,8 +34,6 @@ class PROTOTYPE_API APrototypeCharacter : public ACharacter
 public:
 	APrototypeCharacter();
 
-	void StartFire(); // 기존 함수 선언 유지
-
 	/* --- 체력 (HP) 관련 --- */
 	UFUNCTION(BlueprintPure, Category = "Health")
 	int32 GetMaxHP() const;
@@ -114,7 +112,7 @@ protected:
 	bool bIsInvincible = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Health")
-	float InvincibilityDuration = 5.0f;
+	float InvincibilityDuration = 2.0f;// 무적 지속 시간 (초 단위)
 
 	FTimerHandle InvincibilityTimerHandle;
 
@@ -170,6 +168,9 @@ public:
 	/* --- 불기둥 제어함수 (기존 코드 유지) --- */
 	void SetFlameVisible(bool bVisible);
 
+	/*--- UI 제어 함수 ---*/
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+	void UpdateUI();// 구현은 블루프린트
 
 private:
 	/* --- 카메라 컴포넌트 (기존 코드 유지) --- */
