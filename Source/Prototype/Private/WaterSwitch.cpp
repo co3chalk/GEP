@@ -62,15 +62,28 @@ void AWaterSwitch::OnEnd(UPrimitiveComponent* /*OverlappedComp*/,
 
 void AWaterSwitch::SetTargetsPowered(bool bOn)
 {
-    for (AActor* TargetActor : PoweredTargets)
+    for (AActor* Target : PoweredTargets)
     {
-        if (!TargetActor) continue;
+        if (!Target) continue;
 
         if (bOn)
         {
-            FRotator NewRotation = TargetActor->GetActorRotation();
-            NewRotation.Yaw += 180.f;
-            TargetActor->SetActorRotation(NewRotation);
+            // 저장된 회전 없으면 저장
+            if (!OriginalRotations.Contains(Target))
+            {
+                OriginalRotations.Add(Target, Target->GetActorRotation());
+            }
+
+            FRotator Rotated = Target->GetActorRotation();
+            Rotated.Yaw += 180.f;
+            Target->SetActorRotation(Rotated);
+        }
+        else
+        {
+            if (OriginalRotations.Contains(Target))
+            {
+                Target->SetActorRotation(OriginalRotations[Target]);
+            }
         }
     }
 }

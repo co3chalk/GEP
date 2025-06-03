@@ -33,6 +33,9 @@ public:
     UPROPERTY(EditAnywhere, Category = "Switch")
     TArray<AActor*> PoweredTargets;
 
+    UPROPERTY()
+    TMap<AActor*, FRotator> OriginalRotations;
+
     int32 OverlapCount = 0;
 
     UFUNCTION()
