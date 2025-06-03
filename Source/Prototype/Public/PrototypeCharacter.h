@@ -102,7 +102,7 @@ protected:
 
 	/* --- 체력 (HP) 변수 --- */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
-	int32 MaxHP = 6; // 최대 HP 6
+	int32 MaxHP = 5;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health", meta = (AllowPrivateAccess = "true"))
 	int32 CurrentHP; // 현재 HP

@@ -17,7 +17,7 @@ void APrototypeGameMode::BeginPlay()
         if (PlayerHealthUIInstance != nullptr) //
         {
             UE_LOG(LogTemp, Warning, TEXT("APrototypeGameMode: PlayerHealthUIInstance CREATED and VALID, adding to viewport.")); //
-            PlayerHealthUIInstance->AddToViewport(); //
+            //PlayerHealthUIInstance->AddToViewport(); //
 
             APrototypeCharacter* PlayerCharacter = Cast<APrototypeCharacter>(UGameplayStatics::GetPlayerPawn(this, 0)); //
             if (PlayerCharacter) //
