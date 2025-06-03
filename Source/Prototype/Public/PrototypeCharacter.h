@@ -170,7 +170,11 @@ public:
 
 	/*--- UI 제어 함수 ---*/
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
-	void UpdateUI();// 구현은 블루프린트
+	void UpdateHPUI();// 구현은 블루프린트
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+	void UpdateWeaponUI();// 구현은 블루프린트
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+	void UpdateEnergyUI();// 구현은 블루프린트
 
 private:
 	/* --- 카메라 컴포넌트 (기존 코드 유지) --- */

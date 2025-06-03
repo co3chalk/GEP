@@ -232,7 +232,7 @@ void APrototypeCharacter::TakeDamage(int32 DamageAmount)
     HandleHPChange();
     if (CurrentHP > 0) StartInvincibility();
 
-	UpdateUI(); // UI 업데이트 호출
+	UpdateHPUI(); // UI 업데이트 호출
 }
 
 void APrototypeCharacter::HandleHPChange()
@@ -297,9 +297,9 @@ FString APrototypeCharacter::GetCurrentWeaponName() const
     if (InputManager) // InputManager가 유효한지 확인
     {
         // InputManager의 새로운 public getter 함수들을 사용
-        if (InputManager->IsElectricWeaponActive()) return TEXT("Electric Gun");
-        if (InputManager->IsWaterWeaponActive())   return TEXT("Water Gun");
-        if (InputManager->IsFlameWeaponActive())   return TEXT("Flame Gun");
+        if (InputManager->IsElectricWeaponActive()) return TEXT("ElectricGun");
+        if (InputManager->IsWaterWeaponActive())   return TEXT("WaterGun");
+        if (InputManager->IsFlameWeaponActive())   return TEXT("FlameGun");
     }
     return TEXT("Shooter"); // 기본값 또는 InputManager가 없을 경우
 }
@@ -311,7 +311,7 @@ void APrototypeCharacter::NotifyWeaponChanged()
     CurrentWeaponDisplayName = GetCurrentWeaponName(); // 현재 무기 이름 업데이트
     OnWeaponChanged.Broadcast(CurrentWeaponDisplayName); // 델리게이트 호출
 
-	UpdateUI(); // UI 업데이트 호출
+	UpdateWeaponUI(); // UI 업데이트 호출
     UE_LOG(LogTemp, Warning, TEXT("APrototypeCharacter::NotifyWeaponChanged - Broadcasting OnWeaponChanged. NewWeapon: %s"), *CurrentWeaponDisplayName);
 }
 
@@ -319,7 +319,7 @@ void APrototypeCharacter::NotifyWeaponChanged()
 void APrototypeCharacter::SetGetBasicEnergy(bool bValue)
 {
     basicEnergy++;
-    UpdateUI();
+    UpdateEnergyUI();
     OnBasicEnergyChanged.Broadcast(basicEnergy); // 델리게이트 방송
     UE_LOG(LogTemp, Log, TEXT("Basic Energy changed: %d"), basicEnergy);
 }
@@ -327,7 +327,7 @@ void APrototypeCharacter::SetGetBasicEnergy(bool bValue)
 void APrototypeCharacter::SetGetFlameEnergy(bool bValue)
 {
     flameEnergy++;
-    UpdateUI();
+    UpdateEnergyUI();
     OnFlameEnergyChanged.Broadcast(flameEnergy); // 델리게이트 방송
     UE_LOG(LogTemp, Log, TEXT("Flame Energy changed: %d"), flameEnergy);
 }
@@ -335,7 +335,7 @@ void APrototypeCharacter::SetGetFlameEnergy(bool bValue)
 void APrototypeCharacter::SetGetWaterEnergy(bool bValue)
 {
     waterEnergy++;
-    UpdateUI();
+    UpdateEnergyUI();
     OnWaterEnergyChanged.Broadcast(waterEnergy); // 델리게이트 방송
     UE_LOG(LogTemp, Log, TEXT("Water Energy changed: %d"), waterEnergy);
 }
@@ -343,7 +343,7 @@ void APrototypeCharacter::SetGetWaterEnergy(bool bValue)
 void APrototypeCharacter::SetGetElectricEnergy(bool bValue)
 {
     electricEnergy++;
-    UpdateUI();
+    UpdateEnergyUI();
     OnElectricEnergyChanged.Broadcast(electricEnergy); // 델리게이트 방송
     UE_LOG(LogTemp, Log, TEXT("Electric Energy changed: %d"), electricEnergy);
 }
