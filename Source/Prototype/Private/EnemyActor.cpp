@@ -1,14 +1,20 @@
+// EnemyActor.cpp
 #include "EnemyActor.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
-#include "UObject/ConstructorHelpers.h"
-#include "Kismet/KismetMathLibrary.h" // 필요에 따라
+#include "Components/BillboardComponent.h"
+#include "TimerManager.h"
+#include "Engine/World.h"
+#include "Kismet/KismetMathLibrary.h"
+
+#include "ElecBullet.h"
+#include "WaterBullet.h"
+
 
 AEnemyActor::AEnemyActor()
 {
-    // ... (기존 생성자 내용 동일)
     Tags.Add("Enemy");
     PrimaryActorTick.bCanEverTick = true;
 
@@ -16,53 +22,110 @@ AEnemyActor::AEnemyActor()
     RootComponent = CapsuleComponent;
     CapsuleComponent->SetCapsuleHalfHeight(88.0f);
     CapsuleComponent->SetCapsuleRadius(34.0f);
+
+    // 콜리전 활성화 및 오브젝트 타입 설정
     CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-    CapsuleComponent->SetCollisionObjectType(ECC_GameTraceChannel2);
+    CapsuleComponent->SetCollisionObjectType(ECC_GameTraceChannel2); // "Enemy" 채널
+
+    // 기본적으로 모든 채널 무시
     CapsuleComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-    CapsuleComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+    // 특정 채널에 대한 반응 설정
+    CapsuleComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); // 플레이어 Pawn과의 오버랩
+    CapsuleComponent->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block); // 벽 등과 Block (필요에 따라)
+
+    // ElecBullet (ECC_GameTraceChannel1)
     CapsuleComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Overlap);
+    // WaterBullet (ECC_GameTraceChannel10)
     CapsuleComponent->SetCollisionResponseToChannel(ECC_GameTraceChannel10, ECR_Overlap);
+
 
     CharacterMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh"));
     CharacterMesh->SetupAttachment(CapsuleComponent);
     CharacterMesh->SetRelativeLocation(FVector(0.f, 0.f, -CapsuleComponent->GetScaledCapsuleHalfHeight()));
     CharacterMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
-    CharacterMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    CharacterMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 스켈레탈 메시는 보통 자체 콜리전 사용 안 함
 
     ElectroShockEffect = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ElectroShockEffect"));
     ElectroShockEffect->SetupAttachment(CharacterMesh);
     ElectroShockEffect->SetAutoActivate(false);
-    // DefaultElectroShockFX UPROPERTY를 사용한다면 생성자에서 로드할 필요 없음
-    // if (DefaultElectroShockFX) { ElectroShockEffect->SetAsset(DefaultElectroShockFX); }
+
+#if WITH_EDITORONLY_DATA
+    auto CreateVisualizer = [this](FName ComponentName, const FVector& Offset) -> UBillboardComponent* {
+        UBillboardComponent* Billboard = CreateDefaultSubobject<UBillboardComponent>(ComponentName);
+        if (Billboard)
+        {
+            Billboard->SetupAttachment(RootComponent);
+            Billboard->SetRelativeLocation(Offset);
+            Billboard->bIsEditorOnly = true;
+            Billboard->bHiddenInGame = true;
+        }
+        return Billboard;
+    };
+    PatrolPointVisualizerA = CreateVisualizer(TEXT("PatrolVisualizerA"), PatrolOffsetA);
+    PatrolPointVisualizerB = CreateVisualizer(TEXT("PatrolVisualizerB"), PatrolOffsetB);
+    PatrolPointVisualizerC = CreateVisualizer(TEXT("PatrolVisualizerC"), PatrolOffsetC);
+    PatrolPointVisualizerD = CreateVisualizer(TEXT("PatrolVisualizerD"), PatrolOffsetD);
+#endif
 
     CurrentSpeed = Speed;
-    CurrentPatrolPointIndex = 0; // 초기 인덱스
+    CurrentPatrolPointIndex = 0;
+}
+
+void AEnemyActor::OnConstruction(const FTransform& Transform)
+{
+    Super::OnConstruction(Transform);
+#if WITH_EDITORONLY_DATA
+    if (PatrolPointVisualizerA) PatrolPointVisualizerA->SetRelativeLocation(PatrolOffsetA);
+    if (PatrolPointVisualizerB) PatrolPointVisualizerB->SetRelativeLocation(PatrolOffsetB);
+    if (PatrolPointVisualizerC) PatrolPointVisualizerC->SetRelativeLocation(PatrolOffsetC);
+    if (PatrolPointVisualizerD) PatrolPointVisualizerD->SetRelativeLocation(PatrolOffsetD);
+#endif
 }
 
 void AEnemyActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    const FVector BaseLocation = GetActorLocation();
-    PatrolPoints.Empty(); // 배열 비우기
+    if (CapsuleComponent)
+    {
+        CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemyActor::OnCapsuleBeginOverlap);
+    }
 
-    // 설정된 오프셋을 기반으로 실제 패트롤 지점 추가
+    const FVector BaseLocation = GetActorLocation();
+    PatrolPoints.Empty();
     PatrolPoints.Add(BaseLocation + PatrolOffsetA);
     PatrolPoints.Add(BaseLocation + PatrolOffsetB);
     PatrolPoints.Add(BaseLocation + PatrolOffsetC);
     PatrolPoints.Add(BaseLocation + PatrolOffsetD);
-    // 필요한 만큼 더 추가하거나, 특정 조건에 따라 추가할 수 있습니다.
 
-    // 패트롤 지점이 유효한지 확인 (예: 최소 1개 이상이어야 순찰 가능)
     if (PatrolPoints.Num() > 0)
     {
         CurrentPatrolPointIndex = 0;
     }
     else
     {
-        // 패트롤 지점이 없으면 Tick에서 패트롤 로직을 실행하지 않도록 처리 가능
-        // 예를 들어, PrimaryActorTick.bCanEverTick = false; 또는 bCanPatrol = false; 같은 플래그 사용
-        UE_LOG(LogTemp, Warning, TEXT("EnemyActor %s has no patrol points defined."), *GetName());
+        UE_LOG(LogTemp, Warning, TEXT("EnemyActor %s has no patrol points defined."), *GetNameSafe(this));
+    }
+}
+
+void AEnemyActor::OnCapsuleBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    if (OtherActor && OtherActor != this && !OtherActor->IsPendingKill())
+    {
+        if (AElecBullet* ElecBullet = Cast<AElecBullet>(OtherActor))
+        {
+            UE_LOG(LogTemp, Log, TEXT("%s overlapped with ElecBullet: %s. Applying Freeze."), *GetNameSafe(this), *OtherActor->GetName());
+            Freeze(FreezeDurationOnHit);
+            // ElecBullet을 여기서 파괴할지, ElecBullet이 스스로 파괴될지는 게임 로직에 따라 결정
+            // ElecBullet->Destroy(); 
+        }
+        else if (AWaterBullet* WaterBullet = Cast<AWaterBullet>(OtherActor))
+        {
+            UE_LOG(LogTemp, Log, TEXT("%s overlapped with WaterBullet: %s. Applying Slowdown."), *GetNameSafe(this), *OtherActor->GetName());
+            Slowdown(SlowdownDurationOnWaterHit);
+            // WaterBullet은 스스로 OnOverlapEnemy에서 파괴 로직을 가지고 있을 수 있음
+            // 또는 여기서 WaterBullet->DestroyBullet(); 등을 호출
+        }
     }
 }
 
@@ -70,46 +133,42 @@ void AEnemyActor::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    // 패트롤 지점이 없거나, 얼어있으면 이동 및 회전 로직을 실행하지 않음
     if (PatrolPoints.Num() == 0 || bIsFrozen)
     {
         return;
     }
 
     const FVector CurrentLocation = GetActorLocation();
-    // 현재 목표 패트롤 지점
     const FVector TargetLocation = PatrolPoints[CurrentPatrolPointIndex];
-
     FVector MoveDirection = (TargetLocation - CurrentLocation).GetSafeNormal();
 
     if (!MoveDirection.IsNearlyZero())
     {
         FVector NewLocation = CurrentLocation + MoveDirection * CurrentSpeed * DeltaTime;
         SetActorLocation(NewLocation);
-
         FRotator TargetRotation = MoveDirection.Rotation();
-        // 부드러운 회전을 원하면 FMath::RInterpTo 사용
         SetActorRotation(FMath::RInterpTo(GetActorRotation(), TargetRotation, DeltaTime, RotationSpeed));
     }
 
-    // 목표 지점 도달 체크 (거리 임계값은 조절 가능)
     const float DistanceToTargetSquared = FVector::DistSquared(CurrentLocation, TargetLocation);
-    if (DistanceToTargetSquared < FMath::Square(50.f)) // 50유닛 이내로 접근하면 다음 지점으로
+    if (DistanceToTargetSquared < FMath::Square(50.f)) // 50유닛 근접 시
     {
-        // 다음 패트롤 지점으로 인덱스 업데이트 (배열 끝에 도달하면 처음으로 순환)
         CurrentPatrolPointIndex = (CurrentPatrolPointIndex + 1) % PatrolPoints.Num();
     }
 }
 
-// ... Freeze, Unfreeze, Slowdown, RestoreSpeed, ApplyElectroShockEffect 함수들은 기존과 거의 동일하게 유지 ...
-// (ApplyElectroShockEffect 에서 이펙트 에셋 설정 부분이 DefaultElectroShockFX를 사용하도록 바뀔 수 있음)
-
+// Freeze, Unfreeze, Slowdown, RestoreSpeed, ApplyElectroShockEffect 함수들은 변경 없이 유지
+// ... (이하 기존 함수들) ...
 void AEnemyActor::Freeze(float Seconds)
 {
     if (bIsFrozen) return;
+    UE_LOG(LogTemp, Log, TEXT("%s Freeze called for %f seconds."), *GetNameSafe(this), Seconds);
     bIsFrozen = true;
     ApplyElectroShockEffect();
-    GetWorld()->GetTimerManager().SetTimer(FreezeTimerHandle, this, &AEnemyActor::Unfreeze, Seconds, false);
+    if (GetWorld())
+    {
+        GetWorld()->GetTimerManager().SetTimer(FreezeTimerHandle, this, &AEnemyActor::Unfreeze, Seconds, false);
+    }
 }
 
 void AEnemyActor::ApplyElectroShockEffect()
@@ -118,7 +177,7 @@ void AEnemyActor::ApplyElectroShockEffect()
     {
         if (DefaultElectroShockFX && ElectroShockEffect->GetAsset() != DefaultElectroShockFX)
         {
-            ElectroShockEffect->SetAsset(DefaultElectroShockFX); // 에셋이 설정 안되어있으면 여기서 설정
+            ElectroShockEffect->SetAsset(DefaultElectroShockFX);
         }
         ElectroShockEffect->Activate(true);
     }
@@ -135,11 +194,14 @@ void AEnemyActor::Unfreeze()
 
 void AEnemyActor::Slowdown(float Seconds)
 {
-    CurrentSpeed = Speed * 0.5f;
-    GetWorld()->GetTimerManager().SetTimer(SlowdownTimerHandle, this, &AEnemyActor::RestoreSpeed, Seconds, false);
+    CurrentSpeed = Speed * 0.5f; // 기존 속도에서 절반으로
+    if (GetWorld())
+    {
+        GetWorld()->GetTimerManager().SetTimer(SlowdownTimerHandle, this, &AEnemyActor::RestoreSpeed, Seconds, false);
+    }
 }
 
 void AEnemyActor::RestoreSpeed()
 {
-    CurrentSpeed = Speed;
+    CurrentSpeed = Speed; // 원래 속도로 복구
 }
