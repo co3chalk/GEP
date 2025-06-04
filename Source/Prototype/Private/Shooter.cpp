@@ -18,7 +18,7 @@ UShooter::UShooter()
 	PrimaryComponentTick.bCanEverTick = true;
 	NonPhysicsGrabRotationInterpSpeed = 360.0f; // 초당 360도 (값 조절 가능)
 	MaxGrabStretchTolerance = 50.0f; // 예시: 유지 거리에서 50유닛까지는 더 늘어나도 괜찮음 (값 조절 가능)
-	GrabDistanceAdaptThreshold = 20.0f; // 예시: 5 유닛. 이 값보다 더 가까워져야 거리 업데이트
+	GrabDistanceAdaptThreshold = 40.0f; // 예시: 5 유닛. 이 값보다 더 가까워져야 거리 업데이트
 
 	GrabVisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GrabVisualMesh"));
 	GrabVisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
