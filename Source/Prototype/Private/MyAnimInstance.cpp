@@ -8,17 +8,9 @@
 
 UMyAnimInstance::UMyAnimInstance()
 {
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM(TEXT("AnimMontage'/Game/RadiantRobotRachel/Rachel/Animations/Anim_Rachel_BusterFire_Montage.Anim_Rachel_BusterFire_Montage'"));
-	if (AM.Succeeded())
-	{
-		fireMontage = AM.Object;
-		UE_LOG(LogTemp, Log, TEXT("fireMontage loaded successfully!")); // 성공 시 로그 출력
-	}
-	else
-	{
-		UE_LOG(LogTemp, Error, TEXT("Failed to load fireMontage at path: AnimMontage'/Game/RadiantRobotRachel/Rachel/Animations/Anim_Rachel_BusterFire_Montage.Anim_Rachel_BusterFire_Montage'")); // 실패 시 로그 출력
-	}
+	fireMontage = nullptr;
 }
+
 
 
 void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
