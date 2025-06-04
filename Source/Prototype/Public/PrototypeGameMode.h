@@ -13,7 +13,27 @@ class PROTOTYPE_API APrototypeGameMode : public AGameModeBase // 올바른 부모 클�
     GENERATED_BODY()
 
 public:
+    UPROPERTY(EditAnywhere)
+    bool isClearedBasic = false;
+    UPROPERTY(EditAnywhere)
+    bool isClearedFlame = false;
+    UPROPERTY(EditAnywhere)
+    bool isClearedWater = false;
+    UPROPERTY(EditAnywhere)
+    bool isClearedElec = false;
 
+    UPROPERTY(EditAnywhere)
+    bool isGotBasickey = false;
+    UPROPERTY(EditAnywhere)
+    bool isGotFlamekey = false;
+    UPROPERTY(EditAnywhere)
+    bool isGotWaterkey = false;
+    UPROPERTY(EditAnywhere)
+    bool isGotEleckey = false;
+
+    void IsClearedMap(bool isCleared);
+
+    void IsGotKey(bool isGotKey);
 
 private:
  

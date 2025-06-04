@@ -6,6 +6,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 #include "Kismet/GameplayStatics.h"
+#include "PrototypeGameMode.h"
 
 // Sets default values
 APortalBase::APortalBase()
@@ -59,6 +60,8 @@ void APortalBase::BeginPlay()
 {
     Super::BeginPlay();
 
+    
+
     // --- 시작: 나이아가라 효과 설정 및 활성화 로직 추가 ---
     if (PortalEffectComponent && PortalEffectAsset) // 컴포넌트와 에셋이 모두 유효한지 확인
     {
@@ -94,8 +97,37 @@ void APortalBase::OnPortalOverlap(UPrimitiveComponent* OverlappedComponent, AAct
     // if (PlayerCharacter)
     if (OtherActor && (OtherActor != this)) // 자기 자신이 아닌 다른 액터와 오버랩되었는지 확인
     {
-        if (DestinationMapName != NAME_None)
+        FString NowMapName = GetWorld()->GetMapName();
+        NowMapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
+        gameMode = Cast<APrototypeGameMode>(UGameplayStatics::GetGameMode(this));
+
+        if ((DestinationMapName != NAME_None) && gameMode)
         {
+            if (NowMapName == TEXT("WireMap"))
+            {
+                //clear
+                gameMode->IsClearedMap(gameMode->isClearedBasic);
+                UE_LOG(LogTemp, Warning, TEXT("Wire Cleared."));
+            }
+            else if (NowMapName == TEXT("FlameMap"))
+            {
+                //clear
+                gameMode->IsClearedMap(gameMode->isClearedFlame);
+                UE_LOG(LogTemp, Warning, TEXT("Flame Cleared."));
+            }
+            else if (NowMapName == TEXT("WaterMap"))
+            {
+                //clear
+                gameMode->IsClearedMap(gameMode->isClearedWater);
+                UE_LOG(LogTemp, Warning, TEXT("Water Cleared."));
+            }
+            else if (NowMapName == TEXT("ElecMap"))
+            {
+                //clear
+                gameMode->IsClearedMap(gameMode->isClearedElec);
+                UE_LOG(LogTemp, Warning, TEXT("Elec Cleared."));
+            }
+
             UE_LOG(LogTemp, Warning, TEXT("Overlapping with Portal. Attempting to open level: %s"), *DestinationMapName.ToString());
             UGameplayStatics::OpenLevel(this, DestinationMapName);
         }

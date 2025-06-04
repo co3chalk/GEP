@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
+#include "PrototypeGameMode.h"
 #include "PortalBase.generated.h"
 class UStaticMeshComponent; // 이미 전방 선언되어 있을 수 있지만, 명시적으로 추가
 class UNiagaraComponent;    // 나이아가라 컴포넌트를 위한 전방 선언
@@ -54,4 +55,8 @@ public:
     // 플레이어가 포탈에 오버랩되었을 때 호출될 함수입니다.
     UFUNCTION()
     void OnPortalOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+    // 게임모드 받아오기
+    UPROPERTY(EditAnywhere)
+    APrototypeGameMode* gameMode = nullptr;
 };
