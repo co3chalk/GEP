@@ -4,6 +4,8 @@
 #include "EnergyItem.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "PrototypeGameMode.h"
 #include "PrototypeCharacter.h"
 // Sets default values
 AEnergyItem::AEnergyItem()
@@ -42,6 +44,8 @@ void AEnergyItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
     bool bFromSweep, const FHitResult& SweepResult)
 {
+    gameMode = Cast<APrototypeGameMode>(UGameplayStatics::GetGameMode(this));
+
     if (APrototypeCharacter* Player = Cast<APrototypeCharacter>(OtherActor))
     {
         //각 원소마다 획득 카운트 추가, 에너지 획득 되고 각 원소에 맞게 1개 이상 존재하면 발사 가능하게 변경
@@ -61,6 +65,22 @@ void AEnergyItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
         case 3:
             Player->SetGetElectricEnergy(true);
             //
+            break;
+        case 4: // basic맵 키 얻었을때
+            gameMode->IsGotKey(gameMode->isGotBasickey);
+            UE_LOG(LogTemp, Warning, TEXT("basic keykeykey."));
+            break;
+        case 5: // Flame맵 키 얻었을때
+            gameMode->IsGotKey(gameMode->isGotBasickey);
+            UE_LOG(LogTemp, Warning, TEXT("Flame keykeykey."));
+            break;
+        case 6: // Water맵 키 얻었을때
+            gameMode->IsGotKey(gameMode->isGotBasickey);
+            UE_LOG(LogTemp, Warning, TEXT("Water keykeykey."));
+            break;
+        case 7: // Elec맵 키 얻었을때
+            gameMode->IsGotKey(gameMode->isGotBasickey);
+            UE_LOG(LogTemp, Warning, TEXT("Elec keykeykey."));
             break;
         }
         
