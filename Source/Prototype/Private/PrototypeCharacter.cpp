@@ -55,11 +55,6 @@ APrototypeCharacter::APrototypeCharacter()
     InputManager = CreateDefaultSubobject<UInputManager>(TEXT("InputManager"));
 
     /* 화염방사 메시/콜라이더 (기존 코드 유지) */
-    //여기서부터
-    //FlameCylinderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FlameCylinderMesh"));
-    //FlameCylinderMesh->SetupAttachment(RootComponent);
-    //FlameCylinderMesh->SetHiddenInGame(true);
-    //여기까지 캡슐
     FlameParticle = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("FlameParticle"));
     FlameParticle->SetupAttachment(RootComponent);
     FlameParticle->SetAutoActivate(false);  // 초기엔 비활성화
@@ -121,13 +116,26 @@ void APrototypeCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    /* 카메라 위치/회전 업데이트 (기존 코드 유지) */
-    FVector CameraOffset = FVector(-1000.f, 0.f, 0.f); // 카메라 높이 0 -> 1000으로 수정
-    FRotator CameraRotation = FRotator(-45.f, 0.f, 0.f);
-    FVector NewLocation = GetActorLocation() + CameraRotation.RotateVector(CameraOffset);
-    CameraPivot->SetWorldLocation(NewLocation);
-    CameraPivot->SetWorldRotation(CameraRotation);
+    FString MapName = GetWorld()->GetMapName();
+    MapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
 
+    if (MapName == TEXT("GameStartMap"))
+    {
+        /* 오프닝용 맵에서 카메라 위치/회전 업데이트 */
+        FVector CameraOffset = FVector(-210.f, -80.f, 0.f);
+        FRotator CameraRotation = FRotator(0.f, 140.f, 0.f);
+        FVector NewLocation = GetActorLocation() + CameraRotation.RotateVector(CameraOffset);
+        CameraPivot->SetWorldLocation(NewLocation);
+        CameraPivot->SetWorldRotation(CameraRotation);
+    }
+    else {
+        /* 카메라 위치/회전 업데이트 */
+        FVector CameraOffset = FVector(-1000.f, 0.f, 0.f); // 카메라 높이 0 -> 1000으로 수정
+        FRotator CameraRotation = FRotator(-45.f, 0.f, 0.f);
+        FVector NewLocation = GetActorLocation() + CameraRotation.RotateVector(CameraOffset);
+        CameraPivot->SetWorldLocation(NewLocation);
+        CameraPivot->SetWorldRotation(CameraRotation);
+    }
     /* 회전 로직 (기존 코드 유지) */
     if (IsRotationLocked())
         return;
