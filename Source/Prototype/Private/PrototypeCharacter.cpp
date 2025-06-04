@@ -179,6 +179,7 @@ void APrototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
     PlayerInput->BindAction("RightMouseButton", IE_Pressed, InputManager, &UInputManager::HandleRightMouseDown);
     PlayerInput->BindAction("RightMouseButton", IE_Released, InputManager, &UInputManager::HandleRightMouseUp);
     PlayerInput->BindAction("SwapWeapon", IE_Pressed, InputManager, &UInputManager::HandleSwapWeapon);
+    PlayerInput->BindAction("Pause", IE_Pressed, this, &APrototypeCharacter::Pause);
 }
 
 /* ---------- 이동 & 점프 (기존 코드 유지) ---------- */
