@@ -59,7 +59,7 @@ private:
 	/* ---- 거리/플래그/스윙 파라미터 (원본 그대로) ---- */
 	float GrabbedObjectDistance = 0.f;
 	float GrabMaxDistance = 700.f;
-	float GrabMinDistance = 275.f;
+	float GrabMinDistance = 100.f;
 	float ScrollDistanceSpeed = 50.f;
 
 	bool  bIsLineTraceHit = false;
