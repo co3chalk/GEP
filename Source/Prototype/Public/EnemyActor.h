@@ -26,6 +26,14 @@ protected:
 public:
     virtual void Tick(float DeltaTime) override;
 
+    // 블루프린트 클래스 디폴트나 인스턴스에서 움직임 애니메이션을 설정합니다.
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+    UAnimSequenceBase* MoveAnimation;
+
+    // 블루프린트 클래스 디폴트나 인스턴스에서 대기(멈춤) 애니메이션을 설정합니다.
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+    UAnimSequenceBase* IdleAnimation;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
         UCapsuleComponent* CapsuleComponent;
 
@@ -74,7 +82,16 @@ private:
 #endif
 
 
+
 private:
+    // 현재 애니메이션 상태 추적용 (선택 사항이지만, 매 프레임 PlayAnimation 호출 방지)
+    UPROPERTY(Transient) // 저장할 필요 없고, 일시적인 상태
+        UAnimSequenceBase* CurrentPlayingAnimation;
+
+    bool bWasMovingLastFrame; // 이전 프레임의 이동 상태
+
+    // 애니메이션 업데이트 함수
+    void UpdateAnimation();
     TArray<FVector> PatrolPoints;
     int32 CurrentPatrolPointIndex;
     float CurrentSpeed;
