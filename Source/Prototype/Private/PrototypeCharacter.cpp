@@ -257,6 +257,7 @@ void APrototypeCharacter::Die()
     EndInvincibility();
     GetCharacterMovement()->DisableMovement();
     APlayerController* PC = Cast<APlayerController>(GetController());
+    IsDied();
     if (PC) DisableInput(PC);
 }
 
