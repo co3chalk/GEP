@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Sponge.generated.h"
 
+class UBoxComponent;
 class UStaticMeshComponent;
 class UPhysicsConstraintComponent;
 
@@ -25,6 +26,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* boxMesh;
 
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* staticMesh;

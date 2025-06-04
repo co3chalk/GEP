@@ -2,6 +2,7 @@
 
 
 #include "Sponge.h"
+#include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 
@@ -11,8 +12,11 @@ ASponge::ASponge()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+    boxMesh = CreateDefaultSubobject<UBoxComponent>(TEXT("BMesh"));
+    RootComponent = boxMesh;
+
 	staticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-	RootComponent = staticMesh;
+    staticMesh->SetupAttachment(boxMesh);
     //staticMesh->SetSimulatePhysics(true);
 
     staticMesh->SetCollisionObjectType(ECC_GameTraceChannel11); // Sponge 채널로 설정
