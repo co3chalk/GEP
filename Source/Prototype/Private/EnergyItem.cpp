@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "PrototypeGameMode.h"
 #include "PrototypeCharacter.h"
+#include "MovingGround.h"
+
 // Sets default values
 AEnergyItem::AEnergyItem()
 {
@@ -84,7 +86,23 @@ void AEnergyItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
             break;
         }
         
+        SetTargetsPowered(true);
         // 아이템 제거
         Destroy();
+    }
+}
+
+void AEnergyItem::SetTargetsPowered(bool bOn)
+{
+    for (AActor* TargetActor : PoweredTargets)
+    {
+        if (AMovingGround* MovingGround = Cast<AMovingGround>(TargetActor))
+        {
+            MovingGround->SetPowered(bOn);
+        }
+        else if (TargetActor)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("AElecSwitch: Target actor '%s' is not a MovingGround (or other supported type)."), *TargetActor->GetName());
+        }
     }
 }
