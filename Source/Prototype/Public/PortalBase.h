@@ -59,4 +59,7 @@ public:
     // 게임모드 받아오기
     UPROPERTY(EditAnywhere)
     APrototypeGameMode* gameMode = nullptr;
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+        void PortalEnter();// 구현은 블루프린트
 };

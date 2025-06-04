@@ -128,8 +128,9 @@ void APortalBase::OnPortalOverlap(UPrimitiveComponent* OverlappedComponent, AAct
                 UE_LOG(LogTemp, Warning, TEXT("Elec Cleared."));
             }
 
+            PortalEnter();
             UE_LOG(LogTemp, Warning, TEXT("Overlapping with Portal. Attempting to open level: %s"), *DestinationMapName.ToString());
-            UGameplayStatics::OpenLevel(this, DestinationMapName);
+            
         }
         else
         {
