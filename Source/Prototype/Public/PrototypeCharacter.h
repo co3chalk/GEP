@@ -97,6 +97,7 @@ public:
 	void SetGetElectricEnergy(bool bValue);
 
 
+
 protected:
 	virtual void BeginPlay() override;
 
