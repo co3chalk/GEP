@@ -17,6 +17,9 @@ public:
     UFUNCTION() void Fire();
     UFUNCTION(BlueprintPure) bool ShouldLockRotation() const { return false; }
 
+    UPROPERTY(EditAnywhere)
+    class USoundBase* FireSound;
+
 protected:
     virtual void BeginPlay() override;
     virtual void TickComponent(float, ELevelTick, FActorComponentTickFunction*) override;

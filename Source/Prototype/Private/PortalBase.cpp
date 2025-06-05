@@ -97,6 +97,8 @@ void APortalBase::OnPortalOverlap(UPrimitiveComponent* OverlappedComponent, AAct
     // if (PlayerCharacter)
     if (OtherActor && (OtherActor != this)) // 자기 자신이 아닌 다른 액터와 오버랩되었는지 확인
     {
+
+
         FString NowMapName = GetWorld()->GetMapName();
         NowMapName.RemoveFromStart(GetWorld()->StreamingLevelsPrefix);
         gameMode = Cast<APrototypeGameMode>(UGameplayStatics::GetGameMode(this));

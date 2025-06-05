@@ -5,6 +5,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "PrototypeCharacter.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 // Sets default values
 AWaterFlow::AWaterFlow()
@@ -55,6 +56,7 @@ void AWaterFlow::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Oth
 {
     if (APrototypeCharacter* Character = Cast<APrototypeCharacter>(OtherActor))
     {
+		UGameplayStatics::PlaySoundAtLocation(this, DiveSound, GetActorLocation());
         OverlappingCharacters.Add(Character);
     }
 }

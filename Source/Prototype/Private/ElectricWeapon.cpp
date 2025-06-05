@@ -25,6 +25,7 @@ void UElectricWeapon::TickComponent(float Dt, ELevelTick, FActorComponentTickFun
 
 void UElectricWeapon::Fire()
 {
+	UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwnerChar->GetActorLocation());
     if (!BulletClass || !OwnerChar) return;
 
     FVector Muzzle = OwnerChar->GetActorLocation() + OwnerChar->GetActorForwardVector() * 100.f;

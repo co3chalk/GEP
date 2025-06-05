@@ -41,4 +41,6 @@ public:
     // 오버랩 발생 시 호출될 함수
     UFUNCTION()
     void OnPortalOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+    
 };

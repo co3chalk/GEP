@@ -16,8 +16,6 @@ public:
 	// Sets default values for this component's properties
 	UFlameWeapon();
 
-	UFUNCTION() void Fire();
-
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -29,6 +27,9 @@ public:
 	void StartFire();
 	void StopFire();
 
+	UPROPERTY(EditAnywhere)
+	class USoundBase* FireSound;
+	
 private:
 	class APrototypeCharacter* OwnerChar = nullptr;
 };

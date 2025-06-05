@@ -4,6 +4,7 @@
 #include "Sponge.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "PhysicsEngine/PhysicsConstraintComponent.h"
 
 // Sets default values
@@ -93,6 +94,7 @@ void ASponge::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* 
             {
                 staticMesh->SetStaticMesh(ChangedStaticMesh);
                 staticMesh->SetWorldScale3D(FVector(1.0f, 1.0f, 1.2f));
+				UGameplayStatics::PlaySoundAtLocation(this, ChangeSound, GetActorLocation());
             }
         }
 

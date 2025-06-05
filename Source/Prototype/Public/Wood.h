@@ -15,6 +15,9 @@ public:
 	// Sets default values for this actor's properties
 	AWood();
 
+	UPROPERTY(EditAnywhere)
+	class USoundBase* BurnSound;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

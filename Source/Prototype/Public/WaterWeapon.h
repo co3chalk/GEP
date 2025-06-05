@@ -24,6 +24,9 @@ protected:
 public:
     void SpawnWater();
 
+    UPROPERTY(EditAnywhere)
+    class USoundBase* FireSound;
+
     UPROPERTY(EditAnywhere, Category = "Water")
     TSubclassOf<AWaterBullet> WaterBulletClass;
 

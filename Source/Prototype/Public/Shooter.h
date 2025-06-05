@@ -34,6 +34,9 @@ public:
 	float MaxGrabStretchTolerance;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grab|Physics", meta = (DisplayName = "Grab Distance Adapt Threshold"))
 	float GrabDistanceAdaptThreshold; // 이 값보다 더 가까워져야 GrabbedObjectDistance가 줄어듦
+	UPROPERTY(EditAnywhere)
+	class USoundBase* GrabSound;
+
 
 protected:
 	virtual void BeginPlay() override;

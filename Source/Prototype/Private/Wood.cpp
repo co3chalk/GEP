@@ -2,6 +2,7 @@
 
 
 #include "Wood.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h"
 
 // Sets default values
@@ -46,5 +47,6 @@ void AWood::OnFlameOverlap(UPrimitiveComponent* OverlappedComp,	AActor* OtherAct
 
 void AWood::BurnUp()
 {
+	UGameplayStatics::PlaySoundAtLocation(this, BurnSound, GetActorLocation());
 	Destroy();
 }

@@ -4,6 +4,7 @@
 #include "WaterSwitch.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 AWaterSwitch::AWaterSwitch()
 {
@@ -45,6 +46,7 @@ void AWaterSwitch::OnBegin(UPrimitiveComponent* /*OverlappedComp*/,
     UE_LOG(LogTemp, Warning, TEXT("Water Trigger on!")); //
     if (++OverlapCount == 1)
     {
+		UGameplayStatics::PlaySoundAtLocation(this, TriggerSound, GetActorLocation());
         SetTargetsPowered(true);
     }
 }

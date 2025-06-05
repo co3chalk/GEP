@@ -127,14 +127,29 @@ FVector UShooter::GetVisualCylinderStartLocation() const
 void UShooter::Grab() {
 	UE_LOG(LogTemp, Error, TEXT("!!!!!!!!!!!!!! UShooter::Grab() FUNCTION HAS BEEN CALLED !!!!!!!!!!!!!!"));
 
-	if (bIsLineTraceHit && CachedHitResult.GetComponent())
-	{
+	// --- 사운드 재생 부분 수정 ---
+	const FString SoundAssetPath = TEXT("/Game/Audio/wire3"); // 이전과 동일한 경로
+	USoundBase* SoundToPlay = Cast<USoundBase>(StaticLoadObject(USoundBase::StaticClass(), nullptr, *SoundAssetPath));
+
+	if (SoundToPlay && GetWorld() && OwnerChar) { // GetWorld()와 OwnerChar 유효성 검사 추가
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundToPlay, OwnerChar->GetActorLocation());
+	}
+	else {
+		if (!SoundToPlay) {
+			UE_LOG(LogTemp, Warning, TEXT("UShooter::Grab - Failed to load sound: %s"), *SoundAssetPath);
+		}
+		if (!OwnerChar) {
+			UE_LOG(LogTemp, Warning, TEXT("UShooter::Grab - OwnerChar is null, cannot get location for sound."));
+		}
+		// GetWorld()가 null인 경우는 PlaySoundAtLocation 호출 자체가 불가능하므로, UE_LOG는 생략하거나 추가할 수 있습니다.
+	}
+	// --- 사운드 재생 부분 수정 완료 ---
+
+	if (bIsLineTraceHit && CachedHitResult.GetComponent()) {
 		UPrimitiveComponent* HitComponent = CachedHitResult.GetComponent();
 		AActor* HitActor = CachedHitResult.GetActor();
 
-		// --- HitActor Null 체크 (기존 코드 유지) ---
-		if (!HitActor)
-		{
+		if (!HitActor) {
 			UE_LOG(LogTemp, Warning, TEXT("UShooter::Grab - HitComponent '%s' (Class: %s) did not return a valid Actor. Grab attempt aborted."),
 				*GetNameSafe(HitComponent),
 				*GetNameSafe(HitComponent->GetClass())
@@ -144,56 +159,38 @@ void UShooter::Grab() {
 			bShowMissedGrabVisual = true;
 			return;
 		}
-		// --- HitActor Null 체크 종료 ---
 
 		FString ActorName = HitActor->GetName();
-		// ... (태그 관련 로깅은 기존 코드 유지) ...
-		UE_LOG(LogTemp, Warning, TEXT("Shooter: Attempting to grab '%s' (Class: %s). Tags found: %d. Tags: [...]"), // 태그 문자열 부분 생략
+		UE_LOG(LogTemp, Warning, TEXT("Shooter: Attempting to grab '%s' (Class: %s). Tags found: %d. Tags: [...]"),
 			*ActorName,
 			*HitActor->GetClass()->GetName(),
 			HitActor->Tags.Num()
-			// *AllTagsConcatenated // 이 변수 선언 및 초기화는 위에 있어야 합니다.
 		);
 
-
-		// --- 액터 태그 확인 (기존 코드 유지) ---
-		if (HitActor->Tags.Num() > 0)
-		{
+		if (HitActor->Tags.Num() > 0) {
 			UE_LOG(LogTemp, Warning, TEXT("Shooter: Object '%s' has tag(s). Grab ignored."), *HitActor->GetName());
 			return;
 		}
 		UE_LOG(LogTemp, Log, TEXT("Shooter: Object '%s' has NO tags. Proceeding with grab."), *ActorName);
-		// --- 액터 태그 확인 종료 ---
 
-
-		// 3. 태그가 없는 액터인 경우, 물리/비물리 그랩 로직 실행
-		if (HitComponent->IsSimulatingPhysics())
-		{
-			// --- 물리 그랩 가능 여부 GameMode에서 확인 ---
-			APrototypeGameMode* GameMode = Cast<APrototypeGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-			if (GameMode && !GameMode->IsPysGrabActiveForLevel()) // IsPysGrabActiveForLevel() 함수가 GameMode에 있다고 가정
-			{
+		if (HitComponent->IsSimulatingPhysics()) {
+			APrototypeGameMode* GameMode = Cast<APrototypeGameMode>(UGameplayStatics::GetGameMode(GetWorld())); // GetWorld() 유효성 검사가 필요할 수 있음
+			if (GameMode && !GameMode->IsPysGrabActiveForLevel()) {
 				UE_LOG(LogTemp, Warning, TEXT("Shooter: 물리 그랩 기능이 GameMode에서 활성화되지 않았습니다. 그랩 시도 무시."));
-				// 그랩 시도 실패 처리 (예: 놓친 비주얼 표시 또는 그냥 아무것도 안 함)
-				MissedGrabTarget = LineEnd; // 또는 CachedHitResult.ImpactPoint;
+				MissedGrabTarget = LineEnd;
 				MissedGrabTimer = MissedGrabDuration;
 				bShowMissedGrabVisual = true;
-				return; // 함수 종료
+				return;
 			}
-			else if (!GameMode)
-			{
+			else if (!GameMode) {
 				UE_LOG(LogTemp, Error, TEXT("Shooter: GameMode를 가져올 수 없습니다. 물리 그랩 시도 실패."));
-				return; // 함수 종료
+				return;
 			}
-			// GameMode에서 그랩이 활성화되었거나, GameMode를 확인할 수 없는 경우가 아니라면 계속 진행
 			UE_LOG(LogTemp, Log, TEXT("Shooter: GameMode에서 물리 그랩 기능 활성화됨. 물리 그랩 진행."));
-			// --- 물리 그랩 가능 여부 확인 종료 ---
 
-			// 물리 오브젝트 그랩 로직 (기존 코드 유지)
 			FVector GrabStartPointForDistanceCalc = OwnerChar->GetActorLocation();
 			float CurrentDistance = FVector::Dist(GrabStartPointForDistanceCalc, HitComponent->GetComponentLocation());
-			if (CurrentDistance < GrabMinDistance || CurrentDistance > GrabMaxDistance)
-			{
+			if (CurrentDistance < GrabMinDistance || CurrentDistance > GrabMaxDistance) {
 				UE_LOG(LogTemp, Warning, TEXT("Shooter: 물리 오브젝트가 그랩 가능 거리를 벗어났습니다."));
 				return;
 			}
@@ -218,15 +215,12 @@ void UShooter::Grab() {
 			RotationConstraint->SetAngularTwistLimit(EAngularConstraintMotion::ACM_Locked, 0.f);
 
 			DrawDebugSphere(GetWorld(), HitComponent->GetComponentLocation(), 20.f, 12, FColor::Yellow, false, 1.0f);
-			if (OwnerChar && OwnerChar->GetCharacterMovement())
-			{
+			if (OwnerChar && OwnerChar->GetCharacterMovement()) {
 				OwnerChar->GetCharacterMovement()->bOrientRotationToMovement = false;
 			}
 		}
-		else // 비물리 오브젝트/지점 (이 부분은 GameMode 상태 확인 로직을 추가하지 않았습니다. 필요하다면 유사하게 추가 가능)
-		{
-			if (OwnerChar && OwnerChar->GetCharacterMovement())
-			{
+		else {
+			if (OwnerChar && OwnerChar->GetCharacterMovement()) {
 				FVector CurrentVelocity = OwnerChar->GetCharacterMovement()->Velocity;
 				CurrentVelocity.X = 0.0f;
 				CurrentVelocity.Y = 0.0f;
@@ -239,16 +233,12 @@ void UShooter::Grab() {
 			bIsGrabbingNonPhysics = true;
 		}
 	}
-	else // 라인 트레이스가 아무것도 맞추지 못했거나 유효하지 않은 컴포넌트인 경우
-	{
+	else {
 		MissedGrabTarget = LineEnd;
 		MissedGrabTimer = MissedGrabDuration;
 		bShowMissedGrabVisual = true;
 	}
 }
-
-// ... (Release, ScrollUp, ScrollDown, RightMouseDown, RightMouseUp, UpdateLineTrace, UpdateGrabbedPhysics, UpdateGrabbedNonPhysics, UpdateMissedGrabVisual, UpdateGrabVisualMesh 함수들은 그대로 유지) ...
-// (이전 코드와 동일하게 유지됩니다)
 
 void UShooter::Release() {
 	if (GrabbedComponent)

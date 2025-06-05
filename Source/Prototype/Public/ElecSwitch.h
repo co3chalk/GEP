@@ -16,6 +16,9 @@ public:
     AElecSwitch();
     UFUNCTION(BlueprintPure) bool IsPressed() const { return OverlapCount > 0; }
 
+    UPROPERTY(EditAnywhere)
+    class USoundBase* TriggerSound;
+
 protected:
     virtual void BeginPlay() override;
 

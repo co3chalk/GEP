@@ -51,4 +51,7 @@ public:
 
 	void LockMotion();
 	void UnLockMotion();
+
+	UPROPERTY(EditAnywhere)
+	class USoundBase* ChangeSound;
 };

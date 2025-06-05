@@ -4,6 +4,7 @@
 #include "FlameWeapon.h"
 #include "PrototypeCharacter.h" // APrototypeCharacter 헤더 추가
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -36,27 +37,15 @@ void UFlameWeapon::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	// ...
 }
 
-void UFlameWeapon::Fire()
-{
-	UE_LOG(LogTemp, Warning, TEXT("FlameWeapon Fire called"));
-}
 
 void UFlameWeapon::StartFire()
 {
 	if (OwnerChar)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("StartFire: Showing flame cylinder"));
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, OwnerChar->GetActorLocation());
 		OwnerChar->SetFlameVisible(true);
 
-
-		/* 포기포기포기
-		OwnerChar->GetCharacterMovement()->bOrientRotationToMovement = false;
-		OwnerChar->bUseControllerRotationYaw = false;
-		FVector CurrentVelocity = OwnerChar->GetCharacterMovement()->Velocity;
-		CurrentVelocity.X = 0.0f;
-		CurrentVelocity.Y = 0.0f;
-		OwnerChar->GetCharacterMovement()->Velocity = CurrentVelocity;
-		*/
 	}
 	else
 	{

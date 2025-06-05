@@ -1,6 +1,7 @@
 // ElecSwitch.cpp (수정본)
 #include "ElecSwitch.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/StaticMeshComponent.h" // <-- 스태틱 메시 헤더 포함
 #include "MovingGround.h"
 
@@ -36,7 +37,10 @@ void AElecSwitch::OnBegin(UPrimitiveComponent* /*OverlappedComp*/,
     bool                 /*bFromSweep*/,
     const FHitResult&    /*SweepResult*/)
 {
-    if (++OverlapCount == 1) SetTargetsPowered(true);
+    if (++OverlapCount == 1) {
+        SetTargetsPowered(true);
+        UGameplayStatics::PlaySoundAtLocation(this, TriggerSound, GetActorLocation());
+    }
 }
 
 void AElecSwitch::OnEnd(UPrimitiveComponent* /*OverlappedComp*/,

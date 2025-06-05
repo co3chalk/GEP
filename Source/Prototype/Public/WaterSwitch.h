@@ -52,5 +52,8 @@ public:
         UPrimitiveComponent* OtherComp,
         int32 OtherBodyIndex);
 
+    UPROPERTY(EditAnywhere)
+    class USoundBase* TriggerSound;
+
     void SetTargetsPowered(bool bOn);
 };

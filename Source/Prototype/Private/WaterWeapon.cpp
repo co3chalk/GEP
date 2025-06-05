@@ -2,6 +2,7 @@
 #include "WaterBullet.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/Actor.h"
 #include "PrototypeCharacter.h"
 
@@ -39,12 +40,26 @@ void UWaterWeapon::SpawnWater()
 }
 
 // 연사 시작
-void UWaterWeapon::StartFire()
-{
+void UWaterWeapon::StartFire() {
     UE_LOG(LogTemp, Warning, TEXT("WaterWeapon StartFire called"));
 
-    // 타이머로 연사
-    GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWaterWeapon::SpawnWater, FireInterval, true, 0.f);
+    const FString SoundAssetPath = TEXT("/Game/Audio/water1");
+    USoundBase* SoundToPlay = Cast<USoundBase>(StaticLoadObject(USoundBase::StaticClass(), nullptr, *SoundAssetPath));
+
+    if (SoundToPlay && GetWorld()) {
+        FVector SoundLocation = FVector::ZeroVector;
+        if (GetOwner()) {
+            SoundLocation = GetOwner()->GetActorLocation();
+        }
+        UGameplayStatics::PlaySoundAtLocation(GetWorld(), SoundToPlay, SoundLocation);
+    }
+    else {
+        UE_LOG(LogTemp, Warning, TEXT("Failed to load sound '%s' or GetWorld() is null."), *SoundAssetPath);
+    }
+
+    if (GetWorld()) {
+        GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, this, &UWaterWeapon::SpawnWater, FireInterval, true, 0.f);
+    }
 }
 
 // 연사 중지

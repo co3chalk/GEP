@@ -46,4 +46,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Flow")
 	float FlowStrength = 50.f;
 
+	UPROPERTY(EditAnywhere)
+	class USoundBase* DiveSound;
+
 };

@@ -56,8 +56,6 @@ void AElecBullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
     // 총알이 자기 자신과 충돌한 경우 (스폰 직후 등)
     if (OtherActor == this)
     {
-        // 이 경우는 보통 무시합니다. 필요에 따라 로그를 남길 수 있습니다.
-        // ProjectileMovementComponent의 bInitialVelocityInLocalSpace = false 이거나, 스폰 위치 조정으로 방지하는 것이 좋습니다.
         UE_LOG(LogTemp, Verbose, TEXT("AElecBullet::OnHit - Bullet hit itself. Ignoring. Bullet: %s"), *GetNameSafe(this));
         return; // 자기 자신과의 충돌은 특별한 처리를 하지 않고 반환 (파괴 X)
     }
@@ -68,10 +66,7 @@ void AElecBullet::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
         Destroy(); // 총알 파괴
         return;
     }
-    // --- 종료: OtherActor 유효성 검사 ---
-
-    // 이제 OtherActor는 유효함 (nullptr 아님, IsPendingKill 아님, 자기 자신 아님)
-
+    
     // 충돌 시 이펙트 생성
     if (ImpactEffect) // UNiagaraSystem* 타입의 UPROPERTY 변수
     {
