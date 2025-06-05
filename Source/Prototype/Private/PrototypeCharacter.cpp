@@ -214,6 +214,7 @@ void APrototypeCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
     PlayerInput->BindAction("LeftMouseButton", IE_Pressed, InputManager, &UInputManager::HandleGrab);
     PlayerInput->BindAction("LeftMouseButton", IE_Pressed, this, &APrototypeCharacter::PlaySound);
     PlayerInput->BindAction("LeftMouseButton", IE_Released, InputManager, &UInputManager::HandleRelease);
+    PlayerInput->BindAction("LeftMouseButton", IE_Released, this, &APrototypeCharacter::StopSound);
     PlayerInput->BindAction("ScrollUp", IE_Pressed, InputManager, &UInputManager::HandleScrollUp);
     PlayerInput->BindAction("ScrollDown", IE_Pressed, InputManager, &UInputManager::HandleScrollDown);
     PlayerInput->BindAction("RightMouseButton", IE_Pressed, InputManager, &UInputManager::HandleRightMouseDown);

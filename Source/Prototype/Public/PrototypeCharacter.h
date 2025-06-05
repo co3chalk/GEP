@@ -198,7 +198,8 @@ public:
 	void IsDied();// 구현은 블루프린트
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void PlaySound();// 구현은 블루프린트
-
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+	void StopSound();// 구현은 블루프린트
 
 	/* --- 카메라 컴포넌트 (기존 코드 유지) --- */
 	UPROPERTY(VisibleAnywhere) USpringArmComponent* CameraBoom;
