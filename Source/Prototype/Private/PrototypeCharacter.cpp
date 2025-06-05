@@ -71,15 +71,8 @@ APrototypeCharacter::APrototypeCharacter()
     FlameCollider->SetGenerateOverlapEvents(true);
     FlameCollider->ComponentTags.Add(FName("Flame")); // 태그로 구분
 
-    /* --- 체력 & 무적 초기화 --- */
-    MaxHP = 6; // .h와 일치
     CurrentHP = MaxHP;
-    bIsInvincible = false;
 
-    basicEnergy = 0;
-    flameEnergy = 0;
-    waterEnergy = 0;
-    electricEnergy = 0;
 }
 
 /* ---------- BeginPlay ---------- */
@@ -394,4 +387,12 @@ void APrototypeCharacter::SetGetElectricEnergy(bool bValue)
     UpdateEEnergyUI();
     OnElectricEnergyChanged.Broadcast(electricEnergy); // 델리게이트 방송
     UE_LOG(LogTemp, Log, TEXT("Electric Energy changed: %d"), electricEnergy);
+}
+
+void APrototypeCharacter::SetGetKey(bool bValue)
+{
+    Key--;
+    UpdateKeyUI();
+    OnKeyChanged.Broadcast(Key); // 델리게이트 방송
+    UE_LOG(LogTemp, Log, TEXT("Key changed: %d"), electricEnergy);
 }

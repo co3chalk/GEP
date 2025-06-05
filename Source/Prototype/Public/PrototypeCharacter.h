@@ -77,6 +77,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Energy")
 	int32 GetElectricEnergy() const { return electricEnergy; }
 
+	UFUNCTION(BlueprintPure, Category = "Energy")
+	int32 GetKey() const { return Key; }
+
 	// 에너지 변경 델리게이트 (새로 추가)
 	UPROPERTY(BlueprintAssignable, Category = "Energy")
 	FOnEnergyCountChangedDelegate OnBasicEnergyChanged;
@@ -90,12 +93,16 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Energy")
 	FOnEnergyCountChangedDelegate OnElectricEnergyChanged;
 
+	UPROPERTY(BlueprintAssignable, Category = "Energy")
+	FOnEnergyCountChangedDelegate OnKeyChanged;
+
+
 	// 에너지 획득 함수 (기존 유지, 내부에서 델리게이트 호출하도록 .cpp에서 수정)
 	void SetGetBasicEnergy(bool bValue);
 	void SetGetFlameEnergy(bool bValue);
 	void SetGetWaterEnergy(bool bValue);
 	void SetGetElectricEnergy(bool bValue);
-
+	void SetGetKey(bool bValue);
 
 
 protected:
@@ -138,14 +145,16 @@ protected:
 	FString CurrentWeaponDisplayName;
 
 	/* --- 에너지 관련 int 변수 (기존 코드 유지) --- */
-	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Energy") // 카테고리명 일관성 위해 Basic_Energy -> Energy
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Energy") // 
 		int basicEnergy = 3;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Energy") // Flame_Energy -> Energy
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Energy") // 
 		int flameEnergy = 3;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Energy") // Water_Energy -> Energy
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Energy") // 
 		int waterEnergy = 3;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Energy") // Elctric_Energy -> Energy (오타 수정)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Energy") //
 		int electricEnergy = 3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Energy") //
+		int Key = 1;
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -191,6 +200,8 @@ public:
 	void UpdateWEnergyUI();// 구현은 블루프린트
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void UpdateEEnergyUI();// 구현은 블루프린트
+	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+	void UpdateKeyUI();// 구현은 블루프린트
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "UI")
 	void Pause();// 구현은 블루프린트

@@ -69,18 +69,22 @@ void AEnergyItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActo
             //
             break;
         case 4: // basic맵 키 얻었을때
+            Player->SetGetKey(true);
             gameMode->IsGotKey(gameMode->isGotBasickey);
             UE_LOG(LogTemp, Warning, TEXT("basic keykeykey."));
             break;
         case 5: // Flame맵 키 얻었을때
+            Player->SetGetKey(true);
             gameMode->IsGotKey(gameMode->isGotBasickey);
             UE_LOG(LogTemp, Warning, TEXT("Flame keykeykey."));
             break;
         case 6: // Water맵 키 얻었을때
+            Player->SetGetKey(true);
             gameMode->IsGotKey(gameMode->isGotBasickey);
             UE_LOG(LogTemp, Warning, TEXT("Water keykeykey."));
             break;
         case 7: // Elec맵 키 얻었을때
+            Player->SetGetKey(true);
             gameMode->IsGotKey(gameMode->isGotBasickey);
             UE_LOG(LogTemp, Warning, TEXT("Elec keykeykey."));
             break;
