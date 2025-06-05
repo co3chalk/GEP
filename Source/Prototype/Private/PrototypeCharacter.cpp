@@ -54,7 +54,6 @@ APrototypeCharacter::APrototypeCharacter()
     /* 무기/입력 컴포넌트 (기존 코드 유지) */
     Shooter = CreateDefaultSubobject<UShooter>(TEXT("Shooter"));
     ElectricWeapon = CreateDefaultSubobject<UElectricWeapon>(TEXT("ElectricWeapon"));
-    WaterWeapon = CreateDefaultSubobject<UWaterWeapon>(TEXT("WaterWeapon"));
     FlameWeapon = CreateDefaultSubobject<UFlameWeapon>(TEXT("FlameWeapon"));
     InputManager = CreateDefaultSubobject<UInputManager>(TEXT("InputManager"));
 
