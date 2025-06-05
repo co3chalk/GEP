@@ -31,10 +31,34 @@ public:
     UPROPERTY(EditAnywhere)
     bool isGotEleckey = false;
 
+
     void IsClearedMap(bool isCleared);
 
     void IsGotKey(bool isGotKey);
 
+    // --- 물리 그랩 기능 관련 멤버 변수 추가 ---
+  /** 현재 레벨에서 물리 그랩 기능이 활성화되었는지 여부입니다. */
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Gameplay|PhysicsGrab")
+    bool bPysGrabEnabledForCurrentLevel; // 이름 변경 및 명확화
+    // --- 물리 그랩 기능 관련 함수 추가 ---
+  /**
+   * @brief 현재 레벨에서 물리 그랩 기능의 활성화 상태를 설정합니다.
+   * @param bEnable true로 설정하면 현재 레벨에서 물리 그랩을 활성화합니다.
+   */
+    UFUNCTION(BlueprintCallable, Category = "Gameplay|PhysicsGrab")
+    void SetPysGrabActiveForLevel(bool bEnable);
+
+    /**
+     * @brief 현재 레벨에서 물리 그랩 기능이 활성화되어 있는지 확인합니다.
+     * @return 물리 그랩이 활성화되어 있으면 true를 반환합니다.
+     */
+    UFUNCTION(BlueprintPure, Category = "Gameplay|PhysicsGrab")
+    bool IsPysGrabActiveForLevel() const;
+
+    APrototypeGameMode();
+
+    // 레벨 시작 시 GameInstance에서 영구적 잠금 해제 상태를 가져와 적용하기 위해 BeginPlay 오버라이드
+    virtual void BeginPlay() override;
 private:
  
 };

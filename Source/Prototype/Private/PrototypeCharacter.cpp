@@ -18,6 +18,10 @@
 #include "Engine/World.h" 
 #include "TimerManager.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Components/CapsuleComponent.h"     // GetCapsuleComponent() 사용
+#include "Kismet/GameplayStatics.h"      // GetGameInstance, GetGameMode 등 사용
+#include "PrototypeGameInstance.h"     // UPrototypeGameInstance 클래스 사용
+#include "PrototypeGameMode.h"             // APrototypeGameMode 클래스 사용
 
 
 
@@ -83,7 +87,13 @@ APrototypeCharacter::APrototypeCharacter()
 void APrototypeCharacter::BeginPlay()
 {
     Super::BeginPlay();
-
+    // --- 물리 그랩 잠금 해제 아이템과의 오버랩 이벤트 바인딩 추가 ---
+    UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
+    if (CapsuleComp)
+    {
+        CapsuleComp->SetGenerateOverlapEvents(true);
+        CapsuleComp->OnComponentBeginOverlap.AddDynamic(this, &APrototypeCharacter::HandlePysGrabUnlockItemOverlap);
+    }
     /* --- HP/무적 초기화 --- */
     CurrentHP = MaxHP;
     bIsInvincible = false;
@@ -108,6 +118,35 @@ void APrototypeCharacter::BeginPlay()
     {
         FlameParticle->SetVisibility(false);       // 렌더링 숨김
         FlameParticle->DeactivateSystem();         // 파티클 비활성화
+    }
+}
+
+void APrototypeCharacter::HandlePysGrabUnlockItemOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    if (!OtherActor || OtherActor == this) return;
+
+    // "PysGrabUnlockTrigger" 태그를 가진 액터와 닿았는지 확인
+    if (OtherActor->ActorHasTag(FName("PysGrabUnlockTrigger")))
+    {
+        UE_LOG(LogTemp, Log, TEXT("캐릭터가 물리 그랩 잠금 해제 아이템 ('%s')과 접촉!"), *OtherActor->GetName());
+
+        // 1. GameInstance 가져와서 "영구적(세션 동안)"으로 기능 잠금 해제
+        UPrototypeGameInstance* GameInst = Cast<UPrototypeGameInstance>(GetGameInstance());
+        if (GameInst)
+        {
+            GameInst->UnlockPysGrabFeature(); // GameInstance의 상태를 true로 변경
+        }
+
+        // 2. 현재 GameMode 가져와서 "즉시 현재 레벨에서" 기능 활성화 (false를 true로 변경)
+        APrototypeGameMode* ProtoGameMode = Cast<APrototypeGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+        if (ProtoGameMode)
+        {
+            ProtoGameMode->SetPysGrabActiveForLevel(true); // GameMode의 상태를 true로 변경
+        }
+
+        // 3. 이 아이템은 한 번만 작동하도록 파괴 (또는 비활성화)
+        OtherActor->Destroy();
+        UE_LOG(LogTemp, Log, TEXT("잠금 해제 아이템 '%s' 파괴됨."), *OtherActor->GetName());
     }
 }
 

@@ -100,7 +100,16 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+	/** 물리 그랩 잠금 해제 아이템과의 오버랩을 처리하는 함수 */
+	UFUNCTION()
+	void HandlePysGrabUnlockItemOverlap( // 함수 이름은 자유롭게 지정 가능
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	);
 	/* --- 체력 (HP) 변수 --- */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
 	int32 MaxHP = 5;
