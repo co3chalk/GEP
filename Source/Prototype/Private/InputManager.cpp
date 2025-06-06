@@ -69,6 +69,8 @@ void UInputManager::HandleGrab()
 	if (!OwnerChar) return;
 
 	// 한 번 클릭 → 회전 예약
+	UE_LOG(LogTemp, Warning, TEXT("true"));
+
 	OwnerChar->bShouldRotateToMouse = true;
 	OwnerChar->bWaitingForPostRotationAction = true;
 
@@ -101,6 +103,7 @@ void UInputManager::HandleRelease()
 {
 	if (OwnerChar)
 		OwnerChar->bShouldRotateToMouse = false;
+	UE_LOG(LogTemp, Warning, TEXT("false"));
 
 	if (!bUseElectric && Shooter)
 		Shooter->Release();

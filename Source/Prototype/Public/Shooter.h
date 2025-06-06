@@ -36,7 +36,7 @@ public:
 	float GrabDistanceAdaptThreshold; // 이 값보다 더 가까워져야 GrabbedObjectDistance가 줄어듦
 	UPROPERTY(EditAnywhere)
 	class USoundBase* GrabSound;
-
+	// 캐릭터가 호출할 수 있도록 회전 잠금 상태를 반환하는 함수를 선언합니다.
 
 protected:
 	virtual void BeginPlay() override;

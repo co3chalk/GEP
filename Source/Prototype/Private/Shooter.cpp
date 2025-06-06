@@ -200,6 +200,7 @@ void UShooter::Grab() {
 
 			GrabbedObjectDistance = CurrentDistance;
 			GrabbedComponent = HitComponent;
+			UE_LOG(LogTemp, Error, TEXT("DEBUG: Physics Grab Succeeded! GrabbedComponent is now SET."));
 
 			PhysicsHandle->GrabComponentAtLocation(HitComponent, NAME_None, HitComponent->GetComponentLocation());
 			PhysicsHandle->InterpolationSpeed = 100.0f;
@@ -231,6 +232,8 @@ void UShooter::Grab() {
 			FVector GrabStartPointForDistanceCalc = OwnerChar->GetActorLocation();
 			NonPhysicsGrabDistance = FVector::Dist(GrabStartPointForDistanceCalc, NonPhysicsHitLocation);
 			bIsGrabbingNonPhysics = true;
+			UE_LOG(LogTemp, Error, TEXT("DEBUG: NonPhysics Grab Succeeded! GrabbedComponent is now SET."));
+
 		}
 	}
 	else {

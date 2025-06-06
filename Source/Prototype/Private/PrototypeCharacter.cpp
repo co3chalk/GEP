@@ -79,6 +79,57 @@ APrototypeCharacter::APrototypeCharacter()
 void APrototypeCharacter::BeginPlay()
 {
     Super::BeginPlay();
+    if (!Shooter)
+    {
+        Shooter = FindComponentByClass<UShooter>();
+        if (Shooter)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Character::BeginPlay - Shooter component was NULL, but successfully found and re-linked!"));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Character::BeginPlay - FATAL ERROR: Could not find Shooter component at all!"));
+        }
+    }
+
+    if (!ElectricWeapon)
+    {
+        ElectricWeapon = FindComponentByClass<UElectricWeapon>();
+        if (ElectricWeapon)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Character::BeginPlay - ElectricWeapon component was NULL, but successfully found and re-linked!"));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Character::BeginPlay - FATAL ERROR: Could not find ElectricWeapon component at all!"));
+        }
+    }
+
+    if (!WaterWeapon)
+    {
+        WaterWeapon = FindComponentByClass<UWaterWeapon>();
+        if (WaterWeapon)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Character::BeginPlay - WaterWeapon component was NULL, but successfully found and re-linked!"));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Character::BeginPlay - FATAL ERROR: Could not find WaterWeapon component at all!"));
+        }
+    }
+
+    if (!FlameWeapon)
+    {
+        FlameWeapon = FindComponentByClass<UFlameWeapon>();
+        if (FlameWeapon)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Character::BeginPlay - FlameWeapon component was NULL, but successfully found and re-linked!"));
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Character::BeginPlay - FATAL ERROR: Could not find FlameWeapon component at all!"));
+        }
+    }
     // --- 물리 그랩 잠금 해제 아이템과의 오버랩 이벤트 바인딩 추가 ---
     UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
     if (CapsuleComp)
@@ -168,11 +219,15 @@ void APrototypeCharacter::Tick(float DeltaTime)
         CameraPivot->SetWorldRotation(CameraRotation);
     }
     /* 회전 로직 (기존 코드 유지) */
-    if (IsRotationLocked())
-        return;
+    if (IsRotationLocked()) {
+        UE_LOG(LogTemp, Warning, TEXT("grabbbb"));
 
+        return;
+    }
     if (bShouldRotateToMouse)
     {
+        UE_LOG(LogTemp, Warning, TEXT("1111"));
+
         GetCharacterMovement()->bOrientRotationToMovement = false;
         RotateCharacterToMouse();
 
@@ -344,8 +399,21 @@ FString APrototypeCharacter::GetCurrentWeaponName() const
     }
     return TEXT("Shooter"); // 기본값 또는 InputManager가 없을 경우
 }
-bool APrototypeCharacter::IsRotationLocked() const { return Shooter && Shooter->ShouldLockRotation(); }
+bool APrototypeCharacter::IsRotationLocked() const
+{
+    // Shooter 변수가 혹시 nullptr인지 먼저 확인합니다.
+    if (!Shooter)
+    {
+        UE_LOG(LogTemp, Error, TEXT("[CHAR IsRotationLocked] ERROR! My Shooter component variable is NULL!"));
+        return false;
+    }
 
+    // Shooter가 유효하다면, 그 결과를 로그로 남깁니다.
+    const bool bResult = Shooter->ShouldLockRotation();
+    UE_LOG(LogTemp, Warning, TEXT("[CHAR IsRotationLocked] My Shooter at %p says ShouldLockRotation is: %s"), Shooter, bResult ? TEXT("TRUE") : TEXT("FALSE"));
+
+    return bResult;
+}
 // 무기 변경 시 호출될 내부 함수 (새로 추가)
 void APrototypeCharacter::NotifyWeaponChanged()
 {
