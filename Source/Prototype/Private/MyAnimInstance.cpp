@@ -4,6 +4,8 @@
 #include "MyAnimInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "PrototypeCharacter.h" // APrototypeCharacter 클래스의 정보를 가져오기 위해 include합니다.
+
 
 
 UMyAnimInstance::UMyAnimInstance()
@@ -25,8 +27,21 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		auto Character = Cast<ACharacter>(Pawn);
 		if (Character)
 		{
-			IsFalling = Character->GetMovementComponent()->IsFalling();
+			IsFalling = Character->GetMovementComponent()->IsFalling();\
 		}
+		
+	}
+	if (!IsValid(OwnerCharacter))
+	{
+		
+		OwnerCharacter = Cast<APrototypeCharacter>(TryGetPawnOwner());
+	}
+
+	// OwnerCharacter가 유효한지(null이 아닌지) 다시 한번 확실하게 확인합니다.
+	if (IsValid(OwnerCharacter))
+	{
+		
+		HP = OwnerCharacter->GetCurrentHP(); // 이제 이 코드는 안전하게 실행됩니다.
 	}
 }
 

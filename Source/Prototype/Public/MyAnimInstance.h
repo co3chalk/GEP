@@ -28,14 +28,18 @@ public:
 	FName GetfireMontageName(int32 SectionIndex);
 
 private:
+	UPROPERTY()
+	class APrototypeCharacter* OwnerCharacter;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
 	float Speed;
+	
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
 	bool IsFalling;
 	// 이 부분이 수정되었습니다. 'class' 키워드 추가 및 Category 변경
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", Meta = (AllowPrivateAccess = true))
 	class UAnimMontage* fireMontage; // 'class' 키워드를 추가하여 전방 선언합니다.
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
+	float HP;
 
 };
