@@ -127,7 +127,7 @@ void AWaterBullet::OnOverlapEnemy(UPrimitiveComponent* OverlappedComp, AActor* O
 		AEnemyActor* Enemy = Cast<AEnemyActor>(OtherActor);
 		if (Enemy)
 		{
-			Enemy->Slowdown(1.f); // 1초 동안 느려짐
+			Enemy->Slowdown(2.f); // 1초 동안 느려짐
 			DestroyBullet(); // 수정된 DestroyBullet 호출
 		}
 	}
