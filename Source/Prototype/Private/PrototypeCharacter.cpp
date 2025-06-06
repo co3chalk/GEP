@@ -209,6 +209,14 @@ void APrototypeCharacter::Tick(float DeltaTime)
         FVector NewLocation = GetActorLocation() + CameraRotation.RotateVector(CameraOffset);
         CameraPivot->SetWorldLocation(NewLocation);
         CameraPivot->SetWorldRotation(CameraRotation);
+    } else if (MapName == TEXT("EndingMap"))
+    {
+        /* 오프닝용 맵에서 카메라 위치/회전 업데이트 */
+        FVector CameraOffset = FVector(-210.f, -80.f, 0.f);
+        FRotator CameraRotation = FRotator(0.f, 140.f, 0.f);
+        FVector NewLocation = GetActorLocation() + CameraRotation.RotateVector(CameraOffset);
+        CameraPivot->SetWorldLocation(NewLocation);
+        CameraPivot->SetWorldRotation(CameraRotation);
     }
     else {
         /* 카메라 위치/회전 업데이트 */
