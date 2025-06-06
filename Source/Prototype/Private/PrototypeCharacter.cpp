@@ -22,7 +22,7 @@
 #include "Kismet/GameplayStatics.h"      // GetGameInstance, GetGameMode 등 사용
 #include "PrototypeGameInstance.h"     // UPrototypeGameInstance 클래스 사용
 #include "PrototypeGameMode.h"             // APrototypeGameMode 클래스 사용
-
+#include "PrototypeGameInstance.h"
 
 
 /* ---------- 생성자 ---------- */
@@ -220,7 +220,6 @@ void APrototypeCharacter::Tick(float DeltaTime)
     }
     /* 회전 로직 (기존 코드 유지) */
     if (IsRotationLocked()) {
-        UE_LOG(LogTemp, Warning, TEXT("grabbbb"));
 
         return;
     }
@@ -404,14 +403,12 @@ bool APrototypeCharacter::IsRotationLocked() const
     // Shooter 변수가 혹시 nullptr인지 먼저 확인합니다.
     if (!Shooter)
     {
-        UE_LOG(LogTemp, Error, TEXT("[CHAR IsRotationLocked] ERROR! My Shooter component variable is NULL!"));
         return false;
     }
 
     // Shooter가 유효하다면, 그 결과를 로그로 남깁니다.
     const bool bResult = Shooter->ShouldLockRotation();
-    UE_LOG(LogTemp, Warning, TEXT("[CHAR IsRotationLocked] My Shooter at %p says ShouldLockRotation is: %s"), Shooter, bResult ? TEXT("TRUE") : TEXT("FALSE"));
-
+    
     return bResult;
 }
 // 무기 변경 시 호출될 내부 함수 (새로 추가)

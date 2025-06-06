@@ -11,6 +11,8 @@ class UStaticMeshComponent; // 이미 전방 선언되어 있을 수 있지만, 명시적으로 추�
 class UNiagaraComponent;    // 나이아가라 컴포넌트를 위한 전방 선언
 class UNiagaraSystem;       // 나이아가라 시스템 에셋을 위한 전방 선언
 
+class APrototypeGameMode;
+
 UCLASS()
 class PROTOTYPE_API APortalBase : public AActor
 {
