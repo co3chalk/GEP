@@ -24,8 +24,8 @@ ABattery::ABattery()
     }
 
     BodyMesh->SetCollisionProfileName(TEXT("BlockAll"));
-    BodyMesh->SetSimulatePhysics(true);
-    BodyMesh->SetMassOverrideInKg(NAME_None, 10.0f, true);
+    //BodyMesh->SetSimulatePhysics(true);
+    //BodyMesh->SetMassOverrideInKg(NAME_None, 10.0f, true);
 
     for (int32 i = 0; i < 3; ++i)
     {
@@ -41,6 +41,9 @@ void ABattery::BeginPlay()
 {
     Super::BeginPlay();
     UpdateIndicators();
+
+    BodyMesh->SetSimulatePhysics(true);
+    BodyMesh->SetMassOverrideInKg(NAME_None, 10.0f, true);
 }
 
 void ABattery::Tick(float Dt)
