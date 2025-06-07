@@ -66,7 +66,7 @@ public:
         float FreezeDurationOnHit = 3.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-        float SlowdownDurationOnWaterHit = 5.0f;
+        float SlowdownDurationOnWaterHit = 10.0f;
 
 #if WITH_EDITORONLY_DATA // 에디터 전용 데이터임을 명시
 private:

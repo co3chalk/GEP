@@ -230,10 +230,7 @@ void AEnemyActor::UpdateAnimation()
     bWasMovingLastFrame = bIsCurrentlyMoving; // 현재 이동 상태를 다음 프레임을 위해 저장
 }
 
-// Freeze, Unfreeze, Slowdown, RestoreSpeed, ApplyElectroShockEffect 함수들은 변경 없이 유지
-// ... (이하 기존 함수들) ...
-// EnemyActor.cpp
-// EnemyActor.cpp
+
 void AEnemyActor::Freeze(float Seconds)
 {
     if (bIsFrozen) return; // 이미 얼어있다면 중복 실행 방지
@@ -296,7 +293,7 @@ void AEnemyActor::Unfreeze()
 
 void AEnemyActor::Slowdown(float Seconds)
 {
-    CurrentSpeed = Speed * 0.5f; // 기존 속도에서 절반으로
+    CurrentSpeed = 50.f;
     if (GetWorld())
     {
         GetWorld()->GetTimerManager().SetTimer(SlowdownTimerHandle, this, &AEnemyActor::RestoreSpeed, Seconds, false);
