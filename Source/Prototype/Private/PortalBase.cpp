@@ -122,8 +122,9 @@ void APortalBase::OnPortalOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 
 			// PortalEnter();
 			UE_LOG(LogTemp, Warning, TEXT("Overlapping with Portal. Attempting to open level: %s"), *DestinationMapName.ToString());
-
-			UGameplayStatics::OpenLevel(this, DestinationMapName);
+			
+			PortalEnter(); // 블루프린트에서 구현된 이벤트 호출
+			
 		}
 		else
 		{
